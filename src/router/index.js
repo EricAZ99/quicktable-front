@@ -6,6 +6,9 @@ import LandingPage from '../views/LandingPage.vue'
 import LoginView from '../views/Auth/LoginView.vue'
 import Dashboard from '../views/Admin/Dashboard.vue'
 import Menus from '../views/Admin/Menus.vue'
+import Tables from '../views/Admin/Tables.vue'
+import Orders from '../views/Admin/Orders.vue'
+import Stats from '../views/Admin/Stats.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -14,6 +17,9 @@ const router = createRouter({
     { path: '/home', name: 'home', component: HomeView },
     { path: '/admin-home', name: 'Tableau de bord', component: Dashboard },
     { path: '/admin-menu', name: 'Menu', component: Menus },
+    { path: '/admin-table', name: 'Tables', component: Tables },
+    { path: '/admin-order', name: 'Orders', component: Orders },
+    { path: '/admin-stat', name: 'Stats', component: Stats },
     { path: '/about', name: 'about', component: AboutView },
     { path: '/login', name: 'login', component: LoginView },
   ],
