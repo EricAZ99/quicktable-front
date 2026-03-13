@@ -1,8 +1,13 @@
 <script setup>
-import HelloWorld from '../components/HelloWorld.vue'
+import AuthenticatedLayoutAdmin from './Layouts/AuthenticatedLayoutAdmin.vue'
+import Dashboard from './Admin/Dashboard.vue'
+
 </script>
 
 <template>
-  <HelloWorld />
+  <!-- <HelloWorld /> -->
+  
+  <AuthenticatedLayoutAdmin>
+    <!-- <Dashboard /> -->
+  </AuthenticatedLayoutAdmin>
 </template>
-
