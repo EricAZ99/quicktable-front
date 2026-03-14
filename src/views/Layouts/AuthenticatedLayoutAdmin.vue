@@ -1,5 +1,4 @@
 <script setup>
-import { computed, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import PrimaryButton from '../../components/PrimaryButton.vue';
 
@@ -19,7 +18,7 @@ const route = useRoute()
 </script>
 
 <template>
-    <div class="flex mx-40 h-full gap-4 text-slate-800 font-medium">
+    <div class="flex w-full max-h-screen h-dvh gap-4 px-4 sm:px-6 xl:px-10 2xl:px-40 text-slate-800 font-medium overflow-x-hidden">
         <div class="hidden h-full w-1/5 p-s6 text-sm xl:flex flex-col justify-start gap-4">
             <div class="border rounded-2xl bg-white p-6">
                 <h2 class="font-bold text-lg mb-2">QuickTable Admin</h2>
@@ -49,7 +48,7 @@ const route = useRoute()
                 </nav>
             </div>
         </div>
-        <div class="w-full xl:flex-1 flex flex-col gap-6">
+        <div class="flex-1 min-w-0 flex flex-col gap-6 overflow-x-hidden">
             <div class="bg-white p-6 rounded-2xl border flex justify-between w-full">
                 <div class="flex flex-col">
                     <p class="font-normal text-sm">Admin / {{ route.name }}</p>
@@ -62,7 +61,7 @@ const route = useRoute()
                     </PrimaryButton>
                 </div>
             </div>
-            <div class="font-normal text-sm">
+            <div class="rounded-2xl overflow-hidden h-full">
                 <slot />
             </div>
         </div>

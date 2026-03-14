@@ -10,7 +10,7 @@ const mainClass = computed(() =>
 </script>
 
 <template>
-  <div class="w-dvw h-dvh overflow-x-hidden overflow-y-auto bg-slate-50">
+  <div class="w-dvw h-dvh overflow-x-hidden overflow-hidden bg-slate-50">
     <!-- <header v-if="route.name == 'landing-page'" class="border-b">
       <nav class="mx-auto flex max-w-5xl items-center gap-4 p-4">
         <RouterLink class="text-sm font-medium hover:underline" to="/">Accueil</RouterLink>

@@ -1,15 +1,8 @@
 <script setup>
-defineProps({
-    color: {
-        type: String,
-        default: 'gray'
-    },
-
-})
 </script>
 
 <template>
-    <button :class="`bg-${color}-900 hover:bg-${color}-800`" class="text-slate-800 border font-semibold py-2 px-3 text-sm rounded-2xl">
+    <button class="duration-200 transition-all bg-slate-800 text-white hover:bg-white hover:text-slate-500 border font-semibold py-2 px-3 text-sm rounded-2xl">
         <slot></slot>
     </button>
 </template>

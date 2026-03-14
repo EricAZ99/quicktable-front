@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import AuthenticatedLayoutAdmin from '../Layouts/AuthenticatedLayoutAdmin.vue';
 import StatCard from '../../components/StatCard.vue';
-import ActivityTable from '../../components/ActivityTable.vue';
+import RecentsActivityTable from '../../components/RecentsActivityTable.vue';
 
 
 const stats = computed(() => [
@@ -38,7 +38,7 @@ const recents_activities = [{
         <StatCard v-for="(stat, index) in stats" :key="index" :stat="stat"></StatCard>
       </div>
       <div class="flex gap-5">
-        <ActivityTable :width="'w-3/5'" :activities="recents_activities" />
+        <RecentsActivityTable :width="'w-3/5'" :activities="recents_activities" />
         <!-- <ActivityTable :width="'flex-1'" :activities="note_tables" /> -->
       </div>
     </AuthenticatedLayoutAdmin>
