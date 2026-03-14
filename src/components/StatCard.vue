@@ -9,16 +9,12 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="border border-gray-200 p-2 bg-white rounded-2xl flex justify-start items-center w-1/4">
-        <div>
-            <p v-html="stat.icon" class="text-slate-800"></p>
-            <!-- {{ stat }} -->
+    <div class="w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-4 flex items-center gap-3">
+        <div class="shrink-0 text-slate-800" v-html="stat.icon"></div>
+        <div class="min-w-0">
+            <p class="text-slate-500 text-sm truncate">{{ stat.title }}</p>
+            <p class="font-bold text-xl leading-tight">{{ stat.value }}</p>
+            <p class="text-slate-500 text-sm truncate">{{ stat.change }}</p>
         </div>
-        <div>
-            <p class="text-slate-500 ml-2">{{ stat.title }}</p>
-            <p class="font-bold text-xl ml-2">{{ stat.value }}</p>
-            <p class="text-slate-500 ml-2">{{ stat.change }}</p>
-        </div>
-
     </div>
 </template>

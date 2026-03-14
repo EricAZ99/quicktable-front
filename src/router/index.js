@@ -9,6 +9,7 @@ import Menus from '../views/Admin/Menus.vue'
 import Tables from '../views/Admin/Tables.vue'
 import Orders from '../views/Admin/Orders.vue'
 import Stats from '../views/Admin/Stats.vue'
+import RegisterView from '../views/Auth/RegisterView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -22,6 +23,7 @@ const router = createRouter({
     { path: '/admin-stat', name: 'Stats', component: Stats },
     { path: '/about', name: 'about', component: AboutView },
     { path: '/login', name: 'login', component: LoginView },
+    { path: '/register', name: 'register', component: RegisterView },
   ],
 })
 

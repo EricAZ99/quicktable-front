@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import AuthenticatedLayoutAdmin from '../Layouts/AuthenticatedLayoutAdmin.vue';
 import StatCard from '../../components/StatCard.vue';
+import ActivityTable from '../../components/ActivityTable.vue';
 
 
 const stats = computed(() => [
@@ -10,13 +11,35 @@ const stats = computed(() => [
   { title: 'Tables actives', value: '14', change: 'En service', icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-12 w-12" fill="currentColor"><path d="M12 22H6A2 2 0 0 1 8 20V8H2V5H16V8H10V20A2 2 0 0 1 12 22M22 2V22H20V15H15V22H13V14A2 2 0 0 1 15 12H20V2Z" /></svg>' },
   { title: 'Alertes', value: '3', change: 'A traiter', icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-12 w-12" fill="currentColor"><path d="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21" /></svg>' },
 ])
+
+
+const recents_activities = [{
+  title: "Nouvelle commande #104",
+  description: "Un nouveau client a passé une commande",
+  time: "Il y a 5 minutes"
+},
+{
+  title: "Table 12 occupée",
+  description: "La table 12 est actuellement utilisée",
+  time: "Il y a 20 minutes"
+},
+{
+  title: "Nouveau message",
+  description: "Vous avez reçu un nouveau message",
+  time: "Il y a 1 heure"
+}
+]
 </script>
 
 <template>
   <div class="h-full">
     <AuthenticatedLayoutAdmin :title="'Tableau de bord'">
-      <div class="rounded-2xl flex justify-between gap-6">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-6">
         <StatCard v-for="(stat, index) in stats" :key="index" :stat="stat"></StatCard>
+      </div>
+      <div class="flex gap-5">
+        <ActivityTable :width="'w-3/5'" :activities="recents_activities" />
+        <!-- <ActivityTable :width="'flex-1'" :activities="note_tables" /> -->
       </div>
     </AuthenticatedLayoutAdmin>
   </div>

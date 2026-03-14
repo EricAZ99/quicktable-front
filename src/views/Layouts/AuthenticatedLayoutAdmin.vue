@@ -45,7 +45,7 @@ const route = useRoute()
                         </span>
                         <span>User</span>
                     </RouterLink>
-                    <RouterLink class="p-2 rounded-lg">Déconnexion</RouterLink>
+                    <RouterLink class="p-2 rounded-lg" to="/">Déconnexion</RouterLink>
                 </nav>
             </div>
         </div>
