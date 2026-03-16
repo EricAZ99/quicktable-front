@@ -5,13 +5,30 @@ import InputText from './InputText.vue';
 import PrimaryButton from './PrimaryButton.vue';
 import SecondaryButton from './SecondaryButton.vue';
 
-const nom = ref('')
-const description = ref('')
-const category = ref('')
-const price = ref('')
-const image = ref('')
-const actif = ref('')
+const props = defineProps({
+    menu: { type: Object, default: null }
+})
 
+const nom = ref(props.menu?.name ?? '')
+const description = ref(props.menu?.description ?? '')
+const category = ref(props.menu?.category ?? '')
+const price = ref(props.menu?.price ?? '')
+const image = ref('')
+const actif = ref(props.menu?.active ?? false)
+
+const categories = [
+    "Déssert", 
+    "Entrée", 
+    "Plat",
+    "Boisson",
+    "Apéritif",
+    "Sauce",
+    "Gateau",
+    "Poisson",
+    "Viande",
+    "Riz",
+    "Pâtes",
+]
 const emits = defineEmits(['onClose'])
 
 async function onsubmit() {
@@ -20,7 +37,7 @@ async function onsubmit() {
 
 <template>
     <FormBackGround>
-        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">Ajouter un menu</h2>
+        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">{{ menu ? 'Modifier un menu' : 'Ajouter un menu' }}</h2>
         <form class="mt-4 space-y-4" @submit.prevent="onSubmit">
             <div>
                 <label class="text-sm font-medium text-slate-700" for="nom">Nom du menu</label>
@@ -34,9 +51,7 @@ async function onsubmit() {
                 <label class="text-sm font-medium text-slate-700" for="category">Catégorie</label>
                 <select name="category" id="category" v-model="category"
                     class="mt-1 w-full rounded-xl border px-3 py-2 text-sm outline-none focus:border-slate-400">
-                    <option value="entree">Entrée</option>
-                    <option value="plat">Plat</option>
-                    <option value="dessert">Dessert</option>
+                    <option  v-for="(cat, index) in categories" :key="index" :value="cat" :selected="cat === category" >{{cat}}</option>
                 </select>
             </div>
             <div>
@@ -60,7 +75,7 @@ async function onsubmit() {
 
             <div class="text-center text-sm text-slate-600 flex justify-end gap-4">
                 <PrimaryButton type="submit" :disabled="isSubmitting">
-                    {{ isSubmitting ? 'Ajouté…' : 'Ajouter' }}
+                    {{ menu ? (isSubmitting ? 'Modifié…' : 'Modifier') : (isSubmitting ? 'Ajouté…' : 'Ajouter') }}
                 </PrimaryButton>
                 <SecondaryButton type="submit" :disabled="isSubmitting" @click="emits('onClose')">
                     Annuler
