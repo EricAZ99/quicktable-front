@@ -1,4 +1,9 @@
 <script setup>
+/**
+ * PrimaryButton
+ * Bouton principal de l'application (fond sombre, texte blanc).
+ * Utilise un slot pour le contenu.
+ */
 </script>
 
 <template>

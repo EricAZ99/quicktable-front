@@ -1,26 +1,33 @@
 <script setup>
+/**
+ * MenuCard
+ * Affichage en mode cartes de la liste des menus.
+ * Accepte un tableau ou un objet de menus et émet les mêmes événements que Table.
+ */
 import { computed } from 'vue'
 
+/** Liste des menus à afficher (tableau ou objet) */
 const props = defineProps({
-    menus: {
-        type: [Array, Object],
-        default: () => ([])
-    }
+    menus: { type: [Array, Object], default: () => ([]) }
 })
 
+/** Événements émis selon l'action effectuée sur une carte */
 const emit = defineEmits(['view', 'edit', 'delete', 'toggle-active'])
 
+/** Normalise les menus en tableau, qu'ils soient passés en Array ou en Object */
 const menuList = computed(() => {
     if (Array.isArray(props.menus)) return props.menus
     if (!props.menus) return []
     return Object.values(props.menus)
 })
 
+/** Retourne l'icône SVG selon l'état actif du menu */
 const setIcon = (icon) => {
     if (icon == false) return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><path d="M9,10V16H15V10H19L12,3L5,10H9M12,5.8L14.2,8H13V14H11V8H9.8L12,5.8M19,18H5V20H19V18Z" /></svg>'
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><path d="M22.11 21.46L2.39 1.73L1.11 3L6.56 8.45L5 10H8.11L9 10.89V16H14.11L16.11 18H5V20H18.11L20.84 22.73L22.11 21.46M11 14V12.89L12.11 14H11M12 5.8L14.2 8H13V9.8L15 11.8V10H19L12 3L9.1 5.9L10.5 7.3L12 5.8Z" /></svg>'
 }
 
+/** Formate une valeur numérique en devise EUR */
 const formatPrice = (value) => {
     if (value === null || value === undefined || value === '') return ''
     const numberValue = typeof value === 'number' ? value : Number(value)

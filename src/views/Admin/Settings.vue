@@ -4,9 +4,9 @@ import AuthenticatedLayoutAdmin from '../Layouts/AuthenticatedLayoutAdmin.vue';
 </script>
 
 <template>
-    <AuthenticatedLayoutAdmin :title="'Statistiques'" :mean="'Gestion de vos statistiques'">
+    <AuthenticatedLayoutAdmin :title="'Paramètres'" :mean="'Gestion de vos commandes'">
         <Transition name="page" mode="out-in" appear>
-            <div class="p-4">Statistiques</div>
+            <div class="p-4">Paramètres</div>
         </Transition>
     </AuthenticatedLayoutAdmin>
 </template>

@@ -18,18 +18,28 @@ const route = useRoute()
 </script>
 
 <template>
-    <div class="flex w-full max-h-screen h-dvh gap-4 px-4 sm:px-6 xl:px-10 2xl:px-40 text-slate-800 font-medium overflow-x-hidden">
-        <div class="hidden h-full w-1/5 p-s6 text-sm xl:flex flex-col justify-start gap-4">
+    <div
+        class="flex w-full xl:max-h-screen xl:h-dvh gap-4 px-4 sm:px-6 xl:px-10 2xl:px-40 text-slate-800 font-medium overflow-x-hidden py-4">
+        <div class="hidden xl:h-full w-1/5 p-s6 text-sm xl:flex flex-col justify-start gap-4 shrink-0">
             <div class="border rounded-2xl bg-white p-6">
                 <h2 class="font-bold text-lg mb-2">QuickTable Admin</h2>
                 <nav class="flex flex-col justify-center font-medium">
-                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100" to="/admin-home">Tableau de bord</RouterLink>
-                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100" to="/admin-menu">Menu</RouterLink>
-                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"  to="/admin-table">Tables</RouterLink>
-                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"  to="/admin-order">Commandes</RouterLink>
-                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"  to="/admin-stat">Statistiques</RouterLink>
-                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"  to="/admin-notice">Avis clients</RouterLink>
-                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"  to="/admin-setting">Paramètres</RouterLink>
+                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
+                        to="/admin-home">Tableau de bord</RouterLink>
+                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
+                        to="/admin-menu">Menu</RouterLink>
+                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
+                        to="/admin-plates">Plates</RouterLink>
+                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
+                        to="/admin-table">Tables</RouterLink>
+                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
+                        to="/admin-order">Commandes</RouterLink>
+                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
+                        to="/admin-stat">Statistiques</RouterLink>
+                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
+                        to="/admin-notice">Avis clients</RouterLink>
+                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
+                        to="/admin-settings">Paramètres</RouterLink>
                 </nav>
             </div>
             <div class="border rounded-2xl bg-white p-6">
@@ -48,11 +58,11 @@ const route = useRoute()
                 </nav>
             </div>
         </div>
-        <div class="flex-1 min-w-0 flex flex-col gap-6 overflow-x-hidden">
-            <div class="bg-white p-6 rounded-2xl border flex justify-between w-full">
+        <div class="flex-1 min-w-0 flex flex-col gap-4 overflow-x-hidden xl:overflow-hidden xl:h-full">
+            <div class="bg-white p-4 rounded-2xl border flex justify-between w-full shrink-0">
                 <div class="flex flex-col">
                     <p class="font-normal text-sm">Admin / {{ route.name }}</p>
-                    <h1 class="font-bold text-xl">{{props.title}}</h1>
+                    <h1 class="font-bold text-xl">{{ props.title }}</h1>
                     <p class="font-normal text-sm">{{ props.mean }}</p>
                 </div>
                 <div>
@@ -61,9 +71,22 @@ const route = useRoute()
                     </PrimaryButton>
                 </div>
             </div>
-            <div class="rounded-2xl overflow-hidden h-full">
+            <div class="rounded-2xl xl:overflow-hidden xl:flex-1 xl:min-h-0">
                 <slot />
             </div>
         </div>
     </div>
 </template>
+
+<style>
+.page-enter-active,
+.page-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+    opacity: 0;
+    transform: translateY(12px);
+}
+</style>

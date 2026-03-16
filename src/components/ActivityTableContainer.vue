@@ -1,29 +1,24 @@
 <script setup>
+/**
+ * ActivityTableContainer
+ * Conteneur générique pour les pages de gestion.
+ * Affiche un en-tête avec titre, description et un bouton d'action optionnel,
+ * ainsi que deux slots : un pour la barre de recherche/filtres, un pour le contenu.
+ */
 import PrimaryButton from './PrimaryButton.vue';
 
-
+/** Titre affiché dans l'en-tête du conteneur */
+/** Description affichée sous le titre */
+/** Affiche ou non le bouton d'action */
+/** Libellé du bouton d'action */
 const props = defineProps({
-    title: {
-        type: String,
-        required: true,
-        default: "Activités récentes"
-    },
-    description: {
-        type: String,
-        required: false
-    },
-    hasButton: {
-        type: Boolean,
-        required: false,
-        default: false
-    },
-    buttonTitle: {
-        type: String,
-        required: false,
-        default: "Ajouter"
-    }
+    title: { type: String, required: true, default: "Activités récentes" },
+    description: { type: String, required: false },
+    hasButton: { type: Boolean, required: false, default: false },
+    buttonTitle: { type: String, required: false, default: "Ajouter" }
 })
 
+/** Événement émis au clic sur le bouton d'action */
 const emits = defineEmits(['onClick'])
 </script>
 <template>

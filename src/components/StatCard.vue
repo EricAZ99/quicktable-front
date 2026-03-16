@@ -1,10 +1,12 @@
 <script setup>
+/**
+ * StatCard
+ * Carte affichant une statistique avec icône, titre, valeur et variation.
+ */
+
+/** Objet stat : { icon, title, value, change } */
 const props = defineProps({
-    stat: {
-        type: Object,
-        required: true,
-        default: () => ({})
-    }
+    stat: { type: Object, required: true, default: () => ({}) }
 })
 </script>
 

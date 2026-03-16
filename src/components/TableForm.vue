@@ -1,46 +1,47 @@
 <script setup>
+/**
+ * TableForm
+ * Formulaire d'ajout ou de modification d'une table.
+ * Si la prop `table` est fournie, le formulaire est en mode édition.
+ */
 import { ref } from 'vue';
 import FormBackGround from './FormBackGround.vue';
 import InputText from './InputText.vue';
 import PrimaryButton from './PrimaryButton.vue';
 import SecondaryButton from './SecondaryButton.vue';
 
+/** Table à modifier. Si null, le formulaire est en mode ajout */
 const props = defineProps({
-    menu: { type: Object, default: null }
+    table: { type: Object, default: null }
 })
 
-const nom = ref(props.menu?.name ?? '')
-const description = ref(props.menu?.description ?? '')
-const category = ref(props.menu?.category ?? '')
-const price = ref(props.menu?.price ?? '')
+/** Champ nom de la table, pré-rempli si en mode édition */
+const nom = ref(props.table?.name ?? '')
+/** Champ description de la table */
+const description = ref(props.table?.description ?? '')
+/** Champ catégorie */
+const category = ref(props.table?.category ?? '')
+/** Champ prix */
+const price = ref(props.table?.price ?? '')
+/** Champ image */
 const image = ref('')
-const actif = ref(props.menu?.active ?? false)
+/** État actif/inactif de la table */
+const actif = ref(props.table?.active ?? false)
 
-const categories = [
-    "Déssert", 
-    "Entrée", 
-    "Plat",
-    "Boisson",
-    "Apéritif",
-    "Sauce",
-    "Gateau",
-    "Poisson",
-    "Viande",
-    "Riz",
-    "Pâtes",
-]
+/** Événement émis pour fermer le formulaire */
 const emits = defineEmits(['onClose'])
 
+/** Soumission du formulaire (ajout ou modification) */
 async function onsubmit() {
 }
 </script>
 
 <template>
     <FormBackGround>
-        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">{{ menu ? 'Modifier un menu' : 'Ajouter un menu' }}</h2>
+        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">{{ table ? 'Modifier un table' : 'Ajouter un table' }}</h2>
         <form class="mt-4 space-y-4" @submit.prevent="onSubmit">
             <div>
-                <label class="text-sm font-medium text-slate-700" for="nom">Nom du menu</label>
+                <label class="text-sm font-medium text-slate-700" for="nom">Nom de la table</label>
                 <InputText id="nom" v-model="nom" type="text" autocomplete="text" placeholder="ex: Salade" />
             </div>
             <div>

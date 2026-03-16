@@ -1,15 +1,15 @@
 <script setup>
+/**
+ * RecentsActivityTable
+ * Affiche la liste des activités récentes dans un conteneur dédié.
+ */
 import ActivityTableContainer from './ActivityTableContainer.vue';
 
+/** Largeur CSS du composant (classe Tailwind, ex: 'w-full', 'w-1/2') */
+/** Liste des activités : [{ title, description, time }] */
 const props = defineProps({
-    width: {
-        type: String,
-        default: 'w-full'
-    },
-    activities: {
-        type: Array,
-        default: []
-    }
+    width: { type: String, default: 'w-full' },
+    activities: { type: Array, default: [] }
 })
 </script>
 <template>

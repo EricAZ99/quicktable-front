@@ -1,100 +1,86 @@
 <script setup>
 import { ref } from 'vue';
 import ActivityTableContainer from '../../components/ActivityTableContainer.vue';
-import MenuForm from '../../components/MenuForm.vue';
+import PlatesForm from '../../components/PlatesForm.vue';
 import Table from '../../components/Table.vue';
 import AuthenticatedLayoutAdmin from '../Layouts/AuthenticatedLayoutAdmin.vue';
 import MenuCard from '../../components/MenuCard.vue';
 import ConfirmDeleteModal from '../../components/ConfirmDeleteModal.vue';
 import Toast from '../../components/Toast.vue';
-import { menus as menusData } from '../../data/menus.js';
+import { plates as platesData } from '../../data/menus.js';
 
-// --- Formulaire d'ajout ---
-/** Contrôle la visibilité du formulaire d'ajout */
 const switch_form = ref(false);
-/** Ferme le formulaire d'ajout */
 const close_form = () => {
     switch_form.value = false;
 };
-/** Ouvre le formulaire d'ajout */
 const open_form = () => {
     switch_form.value = true;
 };
 
-// --- Formulaire de modification ---
-/** Contrôle la visibilité du formulaire de modification */
 const switch_update_form = ref(false);
-/** Menu sélectionné pour modification */
 const selected_menu = ref(null);
-/** Ferme le formulaire de modification et réinitialise la sélection */
 const close_update_form = () => {
     switch_update_form.value = false;
     selected_menu.value = null;
 };
-/** Ouvre le formulaire de modification avec le menu sélectionné */
 const open_update_form = (value) => {
     selected_menu.value = value;
     switch_update_form.value = true;
 };
 
-// --- Affichage ---
-/** Bascule entre la vue tableau et la vue cartes */
+
 const show_active_only = ref(false);
 
-/** Définition des colonnes affichées dans le tableau */
 const menuColumns = [
     { label: 'Nom du menu', key: 'name' },
     { label: 'Description', key: 'description' },
-    // { label: 'Catégorie', key: 'category' },
-    // { label: 'Prix', key: 'price', type: 'price' },
+    { label: 'Catégorie', key: 'category' },
+    { label: 'Prix', key: 'price', type: 'price' },
     { label: 'Actif', key: 'active', type: 'boolean' },
 ]
 
-// --- Données ---
-/** Liste réactive des menus, initialisée depuis le fichier de données */
-const menus = ref([...menusData])
 
-// --- Suppression ---
-/** Contrôle la visibilité du modal de confirmation de suppression */
+const plates = ref([...platesData])
+
+
 const confirm_delete = ref(false);
-/** Menu en attente de suppression */
-const menu_to_delete = ref(null);
-
-// --- Toast ---
-/** Contrôle la visibilité du toast de notification */
+const plate_to_delete = ref(null);
 const show_toast = ref(false);
-/** Message affiché dans le toast */
 const toast_message = ref('');
 
-/** Stocke le menu ciblé et affiche le modal de confirmation */
 const requestDelete = (value) => {
-    menu_to_delete.value = value;
+    plate_to_delete.value = value;
     confirm_delete.value = true;
 };
 
-/** Supprime le menu confirmé, ferme le modal et affiche le toast de succès */
 const confirmDelete = () => {
-    const index = menus.value.findIndex(menu => menu.id === menu_to_delete.value.id);
-    if (index !== -1) menus.value.splice(index, 1);
-    toast_message.value = `« ${menu_to_delete.value.name} » a été supprimé.`;
+    const index = plates.value.findIndex(plate => plate.id === plate_to_delete.value.id);
+    if (index !== -1) plates.value.splice(index, 1);
+    toast_message.value = `« ${plate_to_delete.value.name} » a été supprimé.`;
     confirm_delete.value = false;
-    menu_to_delete.value = null;
+    plate_to_delete.value = null;
     show_toast.value = true;
 };
 
-/** Annule la suppression et ferme le modal */
 const cancelDelete = () => {
     confirm_delete.value = false;
-    menu_to_delete.value = null;
+    plate_to_delete.value = null;
+};
+
+const create = (newPlate) => {
+    plates.value.push(newPlate);
+    close_form()
+    toast_message.value = `« ${newPlate.name} » a été ajouté.`;
+    show_toast.value = true;
 };
 </script>
 
 <template>
     <div>
-        <AuthenticatedLayoutAdmin :title="'Menu'" :mean="'Gestion de menus'">
+        <AuthenticatedLayoutAdmin :title="'Plats'" :mean="'Gestion de plats'">
             <Transition name="page" mode="out-in" appear>
-                <ActivityTableContainer :title="'Liste des Menus'" :description="'Gestion des menus'" :has-button="true"
-                    :button-title="'Ajouter un menu'" @on-click="open_form">
+                <ActivityTableContainer :title="'Liste des Plats'" :description="'Gestion des plats'" :has-button="true"
+                    :button-title="'Ajouter un plat'" @on-click="open_form">
                     <template #search&switch>
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
                             <label class="inline-flex items-center gap-3 select-none cursor-pointer">
@@ -111,35 +97,31 @@ const cancelDelete = () => {
                         </div>
                     </template>
                     <Transition name="fade" mode="out-in">
-                        <!-- Tableau des menus -->
-                        <Table v-if="!show_active_only" :data="menus" :columns="menuColumns" @edit="open_update_form"
+                        <!-- Tableau des plats -->
+                        <Table v-if="!show_active_only" :data="plates" :columns="menuColumns" @edit="open_update_form"
                             :has_update_button="true" :has_view_button="true" :has_delete_button="true"
                             @delete="requestDelete"></Table>
                         <div v-else class="p-6">
-                            <!-- Cartes des menus -->
-                            <MenuCard :menus="menus" @edit="open_update_form"></MenuCard>
+                            <!-- Cartes des plats -->
+                            <MenuCard :menus="plates" @edit="open_update_form"></MenuCard>
                         </div>
                     </Transition>
                 </ActivityTableContainer>
             </Transition>
             <Transition name="slide-up">
                 <!-- Formulaire d'ajout -->
-                <MenuForm v-if="switch_form" @on-close="close_form"></MenuForm>
+                <PlatesForm v-if="switch_form" @create="create" @on-close="close_form"></PlatesForm>
             </Transition>
             <Transition name="slide-up">
                 <!-- Formulaire de modification -->
-                <MenuForm v-if="switch_update_form" :menu="selected_menu" @on-close="close_update_form"></MenuForm>
+                <PlatesForm v-if="switch_update_form" :plate="selected_menu" @on-close="close_update_form"></PlatesForm>
             </Transition>
 
 
-        <ConfirmDeleteModal
-                v-if="confirm_delete"
-                :item-name="menu_to_delete?.name"
-                message="Voulez-vous vraiment supprimer ce menu ? Cette action est irréversible."
-                @confirm="confirmDelete"
-                @cancel="cancelDelete"
-            />
-        <Toast v-if="show_toast" type="success" :message="toast_message" @close="show_toast = false" />
+            <ConfirmDeleteModal v-if="confirm_delete" :item-name="menu_to_delete?.name"
+                message="Voulez-vous vraiment supprimer ce plat ? Cette action est irréversible."
+                @confirm="confirmDelete" @cancel="cancelDelete" />
+            <Toast v-if="show_toast" type="success" :message="toast_message" @close="show_toast = false" />
         </AuthenticatedLayoutAdmin>
     </div>
 </template>

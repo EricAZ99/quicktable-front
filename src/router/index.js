@@ -10,6 +10,9 @@ import Tables from '../views/Admin/Tables.vue'
 import Orders from '../views/Admin/Orders.vue'
 import Stats from '../views/Admin/Stats.vue'
 import RegisterView from '../views/Auth/RegisterView.vue'
+import Notice from '../views/Admin/Notice.vue'
+import Settings from '../views/Admin/Settings.vue'
+import Plates from '../views/Admin/Plates.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -18,10 +21,13 @@ const router = createRouter({
     { path: '/home', name: 'home', component: HomeView },
     { path: '/admin-home', name: 'Tableau de bord', component: Dashboard },
     { path: '/admin-menu', name: 'Menu', component: Menus },
+    { path: '/admin-plates', name: 'Plats', component: Plates },
     { path: '/admin-table', name: 'Tables', component: Tables },
-    { path: '/admin-order', name: 'Orders', component: Orders },
-    { path: '/admin-stat', name: 'Stats', component: Stats },
-    { path: '/about', name: 'about', component: AboutView },
+    { path: '/admin-order', name: 'Commandes', component: Orders },
+    { path: '/admin-stat', name: 'Statistiques', component: Stats },
+    { path: '/admin-notice', name: 'Avis client', component: Notice },
+    { path: '/admin-settings', name: 'Paramètres', component: Settings },
+    { path: '/about', name: 'about', component: Notice },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
   ],

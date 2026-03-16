@@ -1,10 +1,13 @@
 <script setup>
-defineProps({
-    color: {
-        type: String,
-        default: 'red'
-    },
+/**
+ * SecondaryButton
+ * Bouton secondaire de l'application (fond blanc, bordure, texte sombre).
+ * Utilise un slot pour le contenu.
+ */
 
+/** Couleur du bouton (non utilisée visuellement pour l'instant) */
+defineProps({
+    color: { type: String, default: 'red' }
 })
 </script>
 
