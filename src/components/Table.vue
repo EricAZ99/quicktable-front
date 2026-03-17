@@ -52,27 +52,50 @@ const formatCell = (row, col) => {
     const val = row[col.key]
     if (col.type === 'price') return formatPrice(val)
     if (col.type === 'plates' && Array.isArray(val)) {
-        return val.map(p => p.complement?.name ? `${p.name} + ${p.complement.name}` : p.name).join(', ')
+        return val.map(p => {
+            const qty = Math.max(1, Number(p?.qty ?? 1))
+            const baseLabel = qty > 1 ? `${qty}x ${p.name}` : p.name
+
+            const complements = Array.isArray(p?.complements) ? p.complements : []
+            const legacyComplementName = (p?.complement?.name ?? '').trim()
+            const hasAnyComplement = complements.length > 0 || Boolean(legacyComplementName)
+            if (!hasAnyComplement) return baseLabel
+
+            const items = complements.length > 0
+                ? complements
+                : [{ name: legacyComplementName, qty: p?.complement?.qty ?? 1 }]
+
+            const complementsLabel = items
+                .filter(c => Boolean((c?.name ?? '').trim()))
+                .map(c => {
+                    const cqty = Math.max(1, Number(c?.qty ?? 1))
+                    const cname = String(c?.name ?? '').trim()
+                    return cqty > 1 ? `${cqty}x ${cname}` : cname
+                })
+                .join(' + ')
+
+            return complementsLabel ? `${baseLabel} + ${complementsLabel}` : baseLabel
+        }).join(', ')
     }
     return val ?? '—'
 }
 </script>
 
 <template>
-    <div class="relative w-full overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base">
+    <div class="overflow-x-auto">
         <table class="min-w-[740px] w-full text-sm text-left rtl:text-right text-body">
             <thead
-                class="text-sm text-body bg-neutral-secondary-soft border-b rounded-base border-default whitespace-nowrap">
+                class="border-b bg-gray-50 font-medium">
                 <tr>
-                    <th v-for="col in columns" :key="col.key" scope="col" class="px-6 py-3 font-medium">
+                    <th v-for="col in columns" :key="col.key" scope="col" class="px-2 py-3 font-medium">
                         {{ col.label }}
                     </th>
-                    <th scope="col" class="px-6 py-3 font-medium text-end">Action</th>
+                    <th scope="col" class="px-6 py-3 font-medium text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr class="bg-neutral-primary border-b" v-for="(row, index) in data" :key="row.id ?? index">
-                    <td v-for="(col, i) in columns" :key="col.key" class="px-6 py-4 truncate"
+                    <td v-for="(col, i) in columns" :key="col.key" class="px-2 py-4 truncate"
                         :class="i === 0 ? 'font-medium text-heading whitespace-nowrap max-w-[16rem]' : 'max-w-[18rem]'">
                         <template v-if="col.type === 'boolean'">
                             <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"
@@ -97,8 +120,8 @@ const formatCell = (row, col) => {
                         </template>
                         <template v-else>{{ formatCell(row, col) }}</template>
                     </td>
-                    <td class="px-6 py-4">
-                        <div class="flex flex-wsrap items-center justify-end gap-4">
+                    <td class="px-4 py-4">
+                        <div class="flex flex-wsrap items-center justify-end gap-2">
 
                             <button v-if="has_toggle" type="button" class="hover:bg-slate-50 whitespace-nowrap"
                                 @click="emit('toggle-active', row)"

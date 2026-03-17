@@ -25,6 +25,21 @@ export const plates = [
     { id: 2, name: 'Salade César', description: 'Salade avec poulet grillé', category: 'Dîner', price: 8, active: true },
     { id: 3, name: 'Steak Frites', description: 'Steak accompagné de frites', category: 'Dessert', price: 18, active: true },
     { id: 4, name: 'Tarte aux Pommes', description: 'Tarte aux pommes maison', category: 'Dessert', price: 6, active: true },
+    { id: 5, name: 'Poulet', description: 'Poulet', category: 'Principal', price: 3500, active: true },
+    { id: 6, name: 'Poisson', description: 'Poisson', category: 'Principal', price: 2500, active: true },
+    { id: 7, name: 'Riz au gras', description: 'Riz au gras', category: 'Déjeuner', price: 3000, active: true },
+    { id: 8, name: 'Attiéké poisson', description: 'Attiéké poisson', category: 'Déjeuner', price: 3500, active: true },
+    { id: 9, name: 'Spaghetti bolognaise', description: 'Spaghetti bolognaise', category: 'Dîner', price: 2800, active: true },
+    { id: 10, name: "Jus d'orange", description: "Jus d'orange", category: 'Boisson', price: 1000, active: true },
+    { id: 11, name: 'Pizza Margherita', description: 'Pizza Margherita', category: 'Dîner', price: 4500, active: true },
+    { id: 12, name: 'Burger maison', description: 'Burger maison', category: 'Dîner', price: 3200, active: true },
+    { id: 13, name: 'Coca cola', description: 'Coca cola', category: 'Boisson', price: 1000, active: true },
+    { id: 14, name: 'alloco', description: 'alloco', category: 'Accompagnement', price: 500, active: true },
+    { id: 15, name: 'portion de riz', description: 'portion de riz', category: 'Accompagnement', price: 500, active: true },
+    { id: 16, name: 'poulet braisé', description: 'poulet braisé', category: 'Accompagnement', price: 1500, active: true },
+    { id: 17, name: 'fromage', description: 'fromage', category: 'Accompagnement', price: 300, active: true },
+    { id: 18, name: 'sauce piquante', description: 'sauce piquante', category: 'Accompagnement', price: 200, active: true },
+    { id: 19, name: 'frites', description: 'frites', category: 'Accompagnement', price: 800, active: true },
 ];
 
 
@@ -40,6 +55,7 @@ export const categories = [
     { id: 8, name: 'Brunch' },
     { id: 9, name: 'Spécial' },
     { id: 10, name: 'Saisonnier' },
+    { id: 11, name: 'Accompagnement' },
 ];
 
 
@@ -64,7 +80,8 @@ export const orders = [
     {
         order_id: "Commande #0001",
         time: '19h30',
-        table: "Table n°4",
+        table: "-",
+        type: 'Emporté',
         client: 'Dupont',
         plates: [
             { name: 'Poulet', price: 3500, complement: { name: 'alloco', price: 500 } },
@@ -79,6 +96,7 @@ export const orders = [
         order_id: "Commande #0002",
         time: '19h35',
         table: "Table n°2",
+        type: 'Sur place',
         client: 'Martin',
         plates: [
             { name: 'Riz au gras', price: 3000, complement: { name: 'poulet braisé', price: 1500 } }
@@ -92,6 +110,7 @@ export const orders = [
         order_id: "Commande #0003",
         time: '19h40',
         table: "Table n°6",
+        type: 'Sur place',
         client: 'Koffi',
         plates: [
             { name: 'Attiéké poisson', price: 3500, complement: { name: 'alloco', price: 500 } }
@@ -104,7 +123,8 @@ export const orders = [
     {
         order_id: "Commande #0004",
         time: '19h50',
-        table: "Table n°1",
+        table: "-",
+        type: 'Emporté',
         client: 'Aline',
         plates: [
             { name: 'Spaghetti bolognaise', price: 2800, complement: { name: 'fromage', price: 300 } },
@@ -118,7 +138,8 @@ export const orders = [
     {
         order_id: "Commande #0005",
         time: '20h00',
-        table: "Table n°8",
+        table: "",
+        type: 'Emporté',
         client: 'Bernard',
         plates: [
             { name: 'Pizza Margherita', price: 4500, complement: { name: 'sauce piquante', price: 200 } }
@@ -131,7 +152,8 @@ export const orders = [
     {
         order_id: "Commande #0006",
         time: '20h10',
-        table: "Table n°5",
+        table: "",
+        type: 'Emporté',
         client: 'Fatou',
         plates: [
             { name: 'Burger maison', price: 3200, complement: { name: 'frites', price: 800 } },
