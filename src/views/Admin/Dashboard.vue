@@ -91,6 +91,7 @@ const recents_activities = [
 <template>
     <div class="xl:h-full xl:overflow-hidden">
         <AuthenticatedLayoutAdmin :title="'Tableau de bord'" :mean="'Vue d\'ensemble de votre activité'">
+            <Transition name="page" mode="out-in" appear>
 
             <!-- Conteneur principal : colonne scrollable sur mobile, fixe sur desktop -->
             <div class="flex flex-col gap-4 xl:h-full xl:overflow-hidden pb-6 xl:pb-0">
@@ -191,6 +192,7 @@ const recents_activities = [
                 </div>
 
             </div>
+            </Transition>
 
         </AuthenticatedLayoutAdmin>
     </div>

@@ -7,10 +7,11 @@ const route = useRoute()
 const mainClass = computed(() =>
   route.name === 'landing-page' ? 'mx-auto max-w-none p-0' : 'mx-auto h-full py-10',
 )
+const scrollable = computed(() => route.name !== 'landing-page')
 </script>
 
 <template>
-  <div class="w-dvw h-dvh overflow-x-hidden overflow-hidden bg-slate-50">
+  <div :class="['w-dvw h-dvh overflow-x-hidden overflow-hidden bg-slate-50', scrollable ? '' : 'overflow-y-auto']">
     <!-- <header v-if="route.name == 'landing-page'" class="border-b">
       <nav class="mx-auto flex max-w-5xl items-center gap-4 p-4">
         <RouterLink class="text-sm font-medium hover:underline" to="/">Accueil</RouterLink>

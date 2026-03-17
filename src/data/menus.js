@@ -59,7 +59,87 @@ export const tables = [
 
 
 /** Liste des commandes en cours ou terminées */
+
 export const orders = [
-    { id: 1, tableId: 1, items: [1, 2], total: 22, stat: 'En cours', active: true },
-    { id: 2, tableId: 2, items: [3, 4], total: 27, stat: 'Terminé', active: false },
-];
+    {
+        order_id: "Commande #0001",
+        time: '19h30',
+        table: "Table n°4",
+        client: 'Dupont',
+        plates: [
+            { name: 'Poulet', price: 3500, complement: { name: 'alloco', price: 500 } },
+            { name: 'Poisson', price: 2500, complement: { name: 'portion de riz', price: 500 } }
+        ],
+        comments: 'Sans oignon',
+        stat: 'Prêt',
+        payment: 'Payé',
+        total: 7000
+    },
+    {
+        order_id: "Commande #0002",
+        time: '19h35',
+        table: "Table n°2",
+        client: 'Martin',
+        plates: [
+            { name: 'Riz au gras', price: 3000, complement: { name: 'poulet braisé', price: 1500 } }
+        ],
+        comments: '',
+        stat: 'En préparation',
+        payment: 'En attente',
+        total: 4500
+    },
+    {
+        order_id: "Commande #0003",
+        time: '19h40',
+        table: "Table n°6",
+        client: 'Koffi',
+        plates: [
+            { name: 'Attiéké poisson', price: 3500, complement: { name: 'alloco', price: 500 } }
+        ],
+        comments: 'Bien pimenté',
+        stat: 'En préparation',
+        payment: 'Payé',
+        total: 4000
+    },
+    {
+        order_id: "Commande #0004",
+        time: '19h50',
+        table: "Table n°1",
+        client: 'Aline',
+        plates: [
+            { name: 'Spaghetti bolognaise', price: 2800, complement: { name: 'fromage', price: 300 } },
+            { name: 'Jus d’orange', price: 1000, complement: { name: '', price: 0 } }
+        ],
+        comments: '',
+        stat: 'Servi',
+        payment: 'Payé',
+        total: 4100
+    },
+    {
+        order_id: "Commande #0005",
+        time: '20h00',
+        table: "Table n°8",
+        client: 'Bernard',
+        plates: [
+            { name: 'Pizza Margherita', price: 4500, complement: { name: 'sauce piquante', price: 200 } }
+        ],
+        comments: 'Pas trop cuite',
+        stat: 'En attente',
+        payment: 'En attente',
+        total: 4700
+    },
+    {
+        order_id: "Commande #0006",
+        time: '20h10',
+        table: "Table n°5",
+        client: 'Fatou',
+        plates: [
+            { name: 'Burger maison', price: 3200, complement: { name: 'frites', price: 800 } },
+            { name: 'Coca cola', price: 1000, complement: { name: '', price: 0 } }
+        ],
+        comments: '',
+        stat: 'Annulé',
+        payment: 'Refusé',
+        total: 5000
+    }
+]

@@ -3,7 +3,7 @@ import heroImg from '../assets/hero.png'
 </script>
 
 <template>
-  <div class="relative overflow-hidden bg-orange-50">
+  <div class="relative overflow-y-auto h-[90%]  bg-orange-50">
     <div
       class="pointer-events-none absolute right-0 top-0 -z-10 h-[520px] w-[520px] translate-x-1/3 -translate-y-1/3 rounded-full bg-[#FFF1DA]"
     />

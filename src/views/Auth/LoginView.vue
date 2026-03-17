@@ -20,7 +20,7 @@ async function onSubmit() {
     }
 
     await new Promise((r) => setTimeout(r, 350))
-    await router.push('/home')
+    await router.push('/admin-home')
   } finally {
     isSubmitting.value = false
   }

@@ -24,7 +24,8 @@ const props = defineProps({
     can_download: { type: Boolean, default: false },
     icon_on: { type: String, default: 'Activer' },
     icon_off: { type: String, default: 'Désactiver' },
-    activeKey: { type: String, default: 'active' }
+    has_toggle: { type: Boolean, default: true },
+    activeKey: { type: String, default: 'active' },
 })
 
 /** Événements émis selon l'action effectuée sur une ligne */
@@ -50,13 +51,16 @@ const formatPrice = (value) => {
 const formatCell = (row, col) => {
     const val = row[col.key]
     if (col.type === 'price') return formatPrice(val)
+    if (col.type === 'plates' && Array.isArray(val)) {
+        return val.map(p => p.complement?.name ? `${p.name} + ${p.complement.name}` : p.name).join(', ')
+    }
     return val ?? '—'
 }
 </script>
 
 <template>
     <div class="relative w-full overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base">
-        <table class="min-w-[760px] w-full text-sm text-left rtl:text-right text-body">
+        <table class="min-w-[740px] w-full text-sm text-left rtl:text-right text-body">
             <thead
                 class="text-sm text-body bg-neutral-secondary-soft border-b rounded-base border-default whitespace-nowrap">
                 <tr>
@@ -69,19 +73,34 @@ const formatCell = (row, col) => {
             <tbody>
                 <tr class="bg-neutral-primary border-b" v-for="(row, index) in data" :key="row.id ?? index">
                     <td v-for="(col, i) in columns" :key="col.key" class="px-6 py-4 truncate"
-                        :class="i === 0 ? 'font-medium text-heading whitespace-nowrap max-w-[16rem]' : 'max-w-[22rem]'">
+                        :class="i === 0 ? 'font-medium text-heading whitespace-nowrap max-w-[16rem]' : 'max-w-[18rem]'">
                         <template v-if="col.type === 'boolean'">
                             <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"
                                 :class="row[col.key] ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'">
                                 {{ row[col.key] ? 'Actif' : 'Inactif' }}
                             </span>
                         </template>
+                        <template v-else-if="col.type === 'status'">
+                            <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold" :class="{
+                                'bg-yellow-50 text-yellow-700': row[col.key] === 'En attente',
+                                'bg-blue-50 text-blue-700': row[col.key] === 'En préparation',
+                                'bg-emerald-50 text-emerald-700': row[col.key] === 'Servi' || row[col.key] === 'Prêt',
+                                'bg-red-50 text-red-700': row[col.key] === 'Annulé',
+                            }">{{ row[col.key] }}</span>
+                        </template>
+                        <template v-else-if="col.type === 'payment'">
+                            <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold" :class="{
+                                'bg-emerald-50 text-emerald-700': row[col.key] === 'Payé',
+                                'bg-yellow-50 text-yellow-700': row[col.key] === 'En attente',
+                                'bg-red-50 text-red-700': row[col.key] === 'Refusé',
+                            }">{{ row[col.key] }}</span>
+                        </template>
                         <template v-else>{{ formatCell(row, col) }}</template>
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex flex-wsrap items-center justify-end gap-4">
 
-                            <button type="button" class="hover:bg-slate-50 whitespace-nowrap"
+                            <button v-if="has_toggle" type="button" class="hover:bg-slate-50 whitespace-nowrap"
                                 @click="emit('toggle-active', row)"
                                 :class="row[activeKey] ? 'bg-slate-100 text-slate-600' : 'bg-emerald-50 text-emerald-700'"
                                 v-html="setIcon(row[activeKey])">
