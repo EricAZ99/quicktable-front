@@ -35,6 +35,13 @@ const config = computed(() => ({
         bar: 'bg-amber-400',
         svg: 'M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z',
     },
+    error: {
+        label: 'Erreur',
+        icon: 'bg-red-50',
+        iconColor: 'text-red-500',
+        bar: 'bg-red-400',
+        svg: 'M6 18L18 6M6 6l12 12',
+    },
 }[props.type]))
 
 /** Lance le compte à rebours dès le montage du composant */

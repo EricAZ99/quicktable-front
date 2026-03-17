@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import ActivityTableContainer from '../../components/ActivityTableContainer.vue';
 import MenuForm from '../../components/MenuForm.vue';
+import MenuView from '../../components/MenuView.vue';
 import Table from '../../components/Table.vue';
 import AuthenticatedLayoutAdmin from '../Layouts/AuthenticatedLayoutAdmin.vue';
 import MenuCard from '../../components/MenuCard.vue';
@@ -33,8 +34,22 @@ const close_update_form = () => {
 };
 /** Ouvre le formulaire de modification avec le menu sélectionné */
 const open_update_form = (value) => {
+    switch_view.value = false;
     selected_menu.value = value;
     switch_update_form.value = true;
+};
+
+// --- Prévisualisation ---
+const switch_view = ref(false);
+const open_view = (value) => {
+    switch_form.value = false;
+    switch_update_form.value = false;
+    selected_menu.value = value;
+    switch_view.value = true;
+};
+const close_view = () => {
+    switch_view.value = false;
+    selected_menu.value = null;
 };
 
 // --- Affichage ---
@@ -87,6 +102,21 @@ const cancelDelete = () => {
     confirm_delete.value = false;
     menu_to_delete.value = null;
 };
+
+/** Crée ou met à jour un menu selon la présence de l'id */
+const saveMenu = (payload) => {
+    const index = menus.value.findIndex(m => m.id === payload.id);
+    if (index !== -1) {
+        menus.value.splice(index, 1, payload);
+        close_update_form();
+        toast_message.value = `« ${payload.name} » a été modifié.`;
+    } else {
+        menus.value.push({ ...payload, id: Date.now() });
+        close_form();
+        toast_message.value = `« ${payload.name} » a été ajouté.`;
+    }
+    show_toast.value = true;
+};
 </script>
 
 <template>
@@ -113,6 +143,7 @@ const cancelDelete = () => {
                     <Transition name="fade" mode="out-in">
                         <!-- Tableau des menus -->
                         <Table v-if="!show_active_only" :data="menus" :columns="menuColumns" @edit="open_update_form"
+                            @view="open_view"
                             :has_update_button="true" :has_view_button="true" :has_delete_button="true"
                             @delete="requestDelete"></Table>
                         <div v-else class="p-6">
@@ -123,12 +154,15 @@ const cancelDelete = () => {
                 </ActivityTableContainer>
             </Transition>
             <Transition name="slide-up">
+                <MenuView v-if="switch_view" :menu="selected_menu" @close="close_view" />
+            </Transition>
+            <Transition name="slide-up">
                 <!-- Formulaire d'ajout -->
-                <MenuForm v-if="switch_form" @on-close="close_form"></MenuForm>
+                <MenuForm v-if="switch_form" @create="saveMenu" @on-close="close_form"></MenuForm>
             </Transition>
             <Transition name="slide-up">
                 <!-- Formulaire de modification -->
-                <MenuForm v-if="switch_update_form" :menu="selected_menu" @on-close="close_update_form"></MenuForm>
+                <MenuForm v-if="switch_update_form" :menu="selected_menu" @create="saveMenu" @on-close="close_update_form"></MenuForm>
             </Transition>
 
 

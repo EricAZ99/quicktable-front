@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import ActivityTableContainer from '../../components/ActivityTableContainer.vue';
 import PlatesForm from '../../components/PlatesForm.vue';
+import PlateView from '../../components/PlateView.vue';
 import Table from '../../components/Table.vue';
 import AuthenticatedLayoutAdmin from '../Layouts/AuthenticatedLayoutAdmin.vue';
 import MenuCard from '../../components/MenuCard.vue';
@@ -24,8 +25,21 @@ const close_update_form = () => {
     selected_menu.value = null;
 };
 const open_update_form = (value) => {
+    switch_view.value = false;
     selected_menu.value = value;
     switch_update_form.value = true;
+};
+
+const switch_view = ref(false);
+const open_view = (value) => {
+    switch_update_form.value = false;
+    switch_form.value = false;
+    selected_menu.value = value;
+    switch_view.value = true;
+};
+const close_view = () => {
+    switch_view.value = false;
+    selected_menu.value = null;
 };
 
 
@@ -67,10 +81,17 @@ const cancelDelete = () => {
     plate_to_delete.value = null;
 };
 
-const create = (newPlate) => {
-    plates.value.push(newPlate);
-    close_form()
-    toast_message.value = `« ${newPlate.name} » a été ajouté.`;
+const savePlate = (payload) => {
+    const index = plates.value.findIndex(p => p.id === payload.id);
+    if (index !== -1) {
+        plates.value.splice(index, 1, payload);
+        close_update_form();
+        toast_message.value = `« ${payload.name} » a été modifié.`;
+    } else {
+        plates.value.push({ ...payload, id: Date.now() });
+        close_form();
+        toast_message.value = `« ${payload.name} » a été ajouté.`;
+    }
     show_toast.value = true;
 };
 </script>
@@ -99,6 +120,7 @@ const create = (newPlate) => {
                     <Transition name="fade" mode="out-in">
                         <!-- Tableau des plats -->
                         <Table v-if="!show_active_only" :data="plates" :columns="menuColumns" @edit="open_update_form"
+                            @view="open_view"
                             :has_update_button="true" :has_view_button="true" :has_delete_button="true"
                             @delete="requestDelete"></Table>
                         <div v-else class="p-6">
@@ -109,12 +131,13 @@ const create = (newPlate) => {
                 </ActivityTableContainer>
             </Transition>
             <Transition name="slide-up">
-                <!-- Formulaire d'ajout -->
-                <PlatesForm v-if="switch_form" @create="create" @on-close="close_form"></PlatesForm>
+                <PlateView v-if="switch_view" :plate="selected_menu" @close="close_view" />
             </Transition>
             <Transition name="slide-up">
-                <!-- Formulaire de modification -->
-                <PlatesForm v-if="switch_update_form" :plate="selected_menu" @on-close="close_update_form"></PlatesForm>
+                <PlatesForm v-if="switch_form" @create="savePlate" @on-close="close_form"></PlatesForm>
+            </Transition>
+            <Transition name="slide-up">
+                <PlatesForm v-if="switch_update_form" :plate="selected_menu" @create="savePlate" @on-close="close_update_form"></PlatesForm>
             </Transition>
 
 

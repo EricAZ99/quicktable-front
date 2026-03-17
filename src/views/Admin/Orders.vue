@@ -15,8 +15,8 @@ const orderColumns = [
     // { label: 'Nom du client', key: 'client' },
     { label: 'Plats', key: 'plates', type: 'plates' },
     // { label: 'Statut', key: 'stat', type: 'status' },
-    // { label: 'Etat du paiement', key: 'payment', type: 'payment' },
     { label: 'Total', key: 'total', type: 'price' },
+    { label: 'Etat du paiement', key: 'payment', type: 'payment' },
 ];
 
 const orders = ref([...ordersDaras]);
@@ -27,6 +27,7 @@ const switch_view = ref(false);
 const selected_order = ref(null);
 const show_toast = ref(false);
 const toast_message = ref('');
+const toast_type = ref('success');
 
 const open_view = (value) => {
     switch_form.value = false;
@@ -47,6 +48,12 @@ const open_form = () => {
 const close_form = () => { switch_form.value = false; };
 
 const open_update_form = (value) => {
+    if (value.payment === 'Payé') {
+        toast_message.value = `« ${value.order_id} » est déjà payée et ne peut plus être modifiée.`;
+        toast_type.value = 'error';
+        show_toast.value = true;
+        return;
+    }
     switch_form.value = false;
     selected_order.value = value;
     switch_update_form.value = true;
@@ -110,7 +117,7 @@ const requestDelete = (value) => {
                 @on-close="close_update_form" />
         </Transition>
 
-        <Toast v-if="show_toast" type="success" :message="toast_message" @close="show_toast = false" />
+        <Toast v-if="show_toast" :type="toast_type" :message="toast_message" @close="show_toast = false" />
     </AuthenticatedLayoutAdmin>
 </template>
 
