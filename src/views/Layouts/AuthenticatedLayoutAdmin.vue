@@ -73,7 +73,7 @@ const route = useRoute()
                     </PrimaryButton>
                 </div>
             </div>
-            <div class="rounded-2xl xl:overflow-y-auto xl:flex-1 xl:min-h-0">
+            <div class="rounded-2xl max-h-[calc(100dvh-10rem)] overflow-y-auto xl:max-h-none xl:overflow-y-auto xl:flex-1 xl:min-h-0">
                 <slot />
             </div>
         </div>

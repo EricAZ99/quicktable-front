@@ -196,9 +196,9 @@ const activeTabProps = computed(() => ({
     <AuthenticatedLayoutAdmin :title="'Paramètres'" :mean="'Gérez votre compte et vos préférences'">
         <Transition name="page" mode="out-in" appear>
             <div class="flex flex-col gap-4 pb-6">
-                <div class="bg-white rounded-2xl border p-1 flex gap-1 w-fit">
+                <div class="bg-white rounded-2xl border p-1 grid grid-cols-2 sm:grid-cols-3 lg:flex gap-1 w-full lg:w-fit">
                     <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key"
-                        class="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+                        class="px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 text-center whitespace-nowrap"
                         :class="activeTab === tab.key ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-slate-800'">
                         {{ tab.label }}
                     </button>
