@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import ActivityTableContainer from '../../components/ActivityTableContainer.vue';
 import Table from '../../components/Table.vue';
 import AuthenticatedLayoutAdmin from '../Layouts/AuthenticatedLayoutAdmin.vue';
-import MenuCard from '../../components/MenuCard.vue';
+import TableCard from '../../components/TableCard.vue';
 import ConfirmDeleteModal from '../../components/ConfirmDeleteModal.vue';
 import TableView from '../../components/TableView.vue';
 import Toast from '../../components/Toast.vue';
@@ -96,20 +96,24 @@ const add_table = () => {
                     :has-button="true" :button-title="'Ajouter une table'" @on-click="add_table">
                     <template #search&switch>
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                            <label class="inline-flex items-center gap-3 select-none cursor-pointer">
+                                <span class="text-sm text-slate-700">Tableau</span>
+                                <input type="checkbox" v-model="show_active_only" class="sr-only peer" />
+                                <div class="relative h-6 w-11 rounded-full bg-slate-200 transition-colors peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-slate-400 peer-checked:bg-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5"></div>
+                                <span class="text-sm text-slate-700">Cartes</span>
+                            </label>
                             <input type="text" placeholder="Recherche"
                                 class="w-full max-w-xs p-2 px-4 border rounded-xl text-sm outline-none focus:border-slate-400" />
                         </div>
                     </template>
 
-                    <!-- Tableau de la liste des tables -->
-                    <Table v-if="!show_active_only" :data="tables" :columns="tableColumns" @view="open_view_form"
-                        :has_view_button="true" :has_delete_button="true" :can_download="true" @delete="requestDelete">
-                    </Table>
-
-                    <!-- Les cartes de la liste des tables -->
-                    <div v-else class="p-6">
-                        <MenuCard :menus="menus" @edit="open_update_form"></MenuCard>
-                    </div>
+                    <Transition name="fade" mode="out-in">
+                        <Table v-if="!show_active_only" :data="tables" :columns="tableColumns" @view="open_view_form"
+                            :has_view_button="true" :has_delete_button="true" :can_download="true" @delete="requestDelete" />
+                        <div v-else class="p-6">
+                            <TableCard :tables="tables" @view="open_view_form" @delete="requestDelete" />
+                        </div>
+                    </Transition>
                 </ActivityTableContainer>
             </Transition>
 
@@ -129,6 +133,17 @@ const add_table = () => {
 </template>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+    transform: translateY(6px);
+}
+
 .slide-up-enter-active,
 .slide-up-leave-active {
     transition: opacity 0.25s ease, transform 0.25s ease;

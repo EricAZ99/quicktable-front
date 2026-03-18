@@ -13,6 +13,7 @@ import RegisterView from '../views/Auth/RegisterView.vue'
 import Notice from '../views/Admin/Notice.vue'
 import Settings from '../views/Admin/Settings.vue'
 import Plates from '../views/Admin/Plates.vue'
+import Collaborators from '../views/Admin/Collaborators.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -27,6 +28,7 @@ const router = createRouter({
     { path: '/admin-stat', name: 'Statistiques', component: Stats },
     { path: '/admin-notice', name: 'Avis client', component: Notice },
     { path: '/admin-settings', name: 'Paramètres', component: Settings },
+    { path: '/admin-collaborators', name: 'Collaborateurs', component: Collaborators },
     { path: '/about', name: 'about', component: Notice },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },

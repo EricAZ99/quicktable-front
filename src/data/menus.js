@@ -165,3 +165,17 @@ export const orders = [
         total: 5000
     }
 ]
+
+
+export const collaborators = [
+    { id: 1, name: 'Erik Azankpo', email: 'erik.azankpo@univ-littoral.fr', role: 'Administrateur', active: false, add_date: '2023-01-15' },
+    { id: 2, name: 'John Doe', email: 'john.doe@example.com', role: 'Serveur', active: true, add_date: '2022-05-15' },
+    { id: 3, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Chef', active: true, add_date: '2023-10-05' },
+    { id: 4, name: 'Robert Johnson', email: 'robert.johnson@example.com', role: 'Manager', active: true, add_date: '2020-02-18' },
+    { id: 5, name: 'Emily Davis', email: 'emily.davis@example.com', role: 'Serveur', active: true, add_date: '2025-01-10' },
+    { id: 6, name: 'Michael Wilson', email: 'michael.wilson@example.com', role: 'Cuisinier', active: true, add_date: '2019-01-15' },
+    { id: 7, name: 'Sarah Brown', email: 'sarah.brown@example.com', role: 'Réceptionniste', active: true, add_date: '2023-01-15' },
+    { id: 8, name: 'David Miller', email: 'david.miller@example.com', role: 'Administrateur', active: true, add_date: '2023-01-15' },
+    { id: 9, name: 'Lisa Taylor', email: 'lisa.taylor@example.com', role: 'Serveur', active: true, add_date: '2023-01-15' },
+    { id: 10, name: 'James Anderson', email: 'james.anderson@example.com', role: 'Cuisinier', active: true, add_date: '2023-01-15' },
+];

@@ -5,7 +5,7 @@ import MenuForm from '../../components/MenuForm.vue';
 import MenuView from '../../components/MenuView.vue';
 import Table from '../../components/Table.vue';
 import AuthenticatedLayoutAdmin from '../Layouts/AuthenticatedLayoutAdmin.vue';
-import MenuCard from '../../components/MenuCard.vue';
+import MenuCardItem from '../../components/MenuCardItem.vue';
 import ConfirmDeleteModal from '../../components/ConfirmDeleteModal.vue';
 import Toast from '../../components/Toast.vue';
 import { menus as menusData } from '../../data/menus.js';
@@ -147,8 +147,7 @@ const saveMenu = (payload) => {
                             :has_update_button="true" :has_view_button="true" :has_delete_button="true"
                             @delete="requestDelete"></Table>
                         <div v-else class="p-6">
-                            <!-- Cartes des menus -->
-                            <MenuCard :menus="menus" @edit="open_update_form"></MenuCard>
+                            <MenuCardItem :menus="menus" @view="open_view" @edit="open_update_form" @delete="requestDelete" />
                         </div>
                     </Transition>
                 </ActivityTableContainer>

@@ -37,6 +37,8 @@ const route = useRoute()
                     <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
                         to="/admin-stat">Statistiques</RouterLink>
                     <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
+                        to="/admin-collaborators">Collaborateurs</RouterLink>
+                    <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
                         to="/admin-notice">Avis clients</RouterLink>
                     <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
                         to="/admin-settings">Paramètres</RouterLink>
@@ -71,7 +73,7 @@ const route = useRoute()
                     </PrimaryButton>
                 </div>
             </div>
-            <div class="rounded-2xl xl:overflow-hidden xl:flex-1 xl:min-h-0">
+            <div class="rounded-2xl xl:overflow-y-auto xl:flex-1 xl:min-h-0">
                 <slot />
             </div>
         </div>

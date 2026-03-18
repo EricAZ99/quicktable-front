@@ -5,7 +5,7 @@ import PlatesForm from '../../components/PlatesForm.vue';
 import PlateView from '../../components/PlateView.vue';
 import Table from '../../components/Table.vue';
 import AuthenticatedLayoutAdmin from '../Layouts/AuthenticatedLayoutAdmin.vue';
-import MenuCard from '../../components/MenuCard.vue';
+import PlateCard from '../../components/PlateCard.vue';
 import ConfirmDeleteModal from '../../components/ConfirmDeleteModal.vue';
 import Toast from '../../components/Toast.vue';
 import { plates as platesData } from '../../data/menus.js';
@@ -124,8 +124,7 @@ const savePlate = (payload) => {
                             :has_update_button="true" :has_view_button="true" :has_delete_button="true"
                             @delete="requestDelete"></Table>
                         <div v-else class="p-6">
-                            <!-- Cartes des plats -->
-                            <MenuCard :menus="plates" @edit="open_update_form"></MenuCard>
+                            <PlateCard :plates="plates" @view="open_view" @edit="open_update_form" @delete="requestDelete" />
                         </div>
                     </Transition>
                 </ActivityTableContainer>
