@@ -29,7 +29,7 @@ const route = useRoute()
                     <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
                         to="/admin-menu">Menu</RouterLink>
                     <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
-                        to="/admin-plates">Plates</RouterLink>
+                        to="/admin-plates">Plats</RouterLink>
                     <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
                         to="/admin-table">Tables</RouterLink>
                     <RouterLink class="p-2 rounded-lg" active-class="border bg-slate-800 text-slate-100"
