@@ -28,13 +28,13 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="min-h-[calc(100vh-80px)] bg-white">
+  <div class="min-h-[calc(100vh-80px)] bg-white flex justify-center items-center">
     <div class="mx-auto max-w-5xl px-4 py-10">
       <div class="mx-auto max-w-md rounded-2xl border bg-white p-6 shadow-sm">
         <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Login</h1>
         <p class="mt-1 text-sm text-slate-600 flex justify-between">Connecte-toi pour accéder à ton espace.
           
-          <RouterLink class="font-semibold text-slate-900 hover:underline" to="/register">S'inscrire</RouterLink></p>
+          <RouterLink class="font-semibold text-slate-900 hover:underline ml-2" to="/register">S'inscrire</RouterLink></p>
 
         <form class="mt-6 space-y-4" @submit.prevent="onSubmit">
           <div>
