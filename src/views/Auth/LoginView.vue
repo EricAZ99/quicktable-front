@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import InputText from '../../components/InputText.vue'
+import { login } from '../../services/auth'
 
 const router = useRouter()
 
@@ -13,14 +14,22 @@ const error = ref('')
 async function onSubmit() {
   error.value = ''
   isSubmitting.value = true
+
   try {
     if (!email.value || !password.value) {
       error.value = 'Email et mot de passe requis.'
       return
     }
 
-    await new Promise((r) => setTimeout(r, 350))
+    const response = await login({
+      email: email.value,
+      password: password.value,
+    })
+
+    localStorage.setItem('quicktable_auth', JSON.stringify(response))
     await router.push('/admin-home')
+  } catch (err) {
+    error.value = err.message || 'Connexion impossible.'
   } finally {
     isSubmitting.value = false
   }
@@ -32,15 +41,23 @@ async function onSubmit() {
     <div class="mx-auto max-w-5xl px-4 py-10">
       <div class="mx-auto max-w-md rounded-2xl border bg-white p-6 shadow-sm">
         <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Login</h1>
-        <p class="mt-1 text-sm text-slate-600 flex justify-between">Connecte-toi pour accéder à ton espace.
-          
-          <RouterLink class="font-semibold text-slate-900 hover:underline ml-2" to="/register">S'inscrire</RouterLink></p>
+        <p class="mt-1 flex justify-between text-sm text-slate-600">
+          Connecte-toi pour acceder a ton espace.
+          <RouterLink class="ml-2 font-semibold text-slate-900 hover:underline" to="/register">
+            S'inscrire
+          </RouterLink>
+        </p>
 
         <form class="mt-6 space-y-4" @submit.prevent="onSubmit">
           <div>
             <label class="text-sm font-medium text-slate-700" for="email">Email</label>
-            <InputText id="email" v-model="email" type="email" autocomplete="email"
-              placeholder="ex: nom@restaurant.com" />
+            <InputText
+              id="email"
+              v-model="email"
+              type="email"
+              autocomplete="email"
+              placeholder="ex: nom@restaurant.com"
+            />
           </div>
 
           <div>
@@ -52,13 +69,18 @@ async function onSubmit() {
             {{ error }}
           </p>
 
-          <button type="submit" :disabled="isSubmitting"
-            class="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60">
-            {{ isSubmitting ? 'Connexion…' : 'Se connecter' }}
+          <button
+            type="submit"
+            :disabled="isSubmitting"
+            class="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+          >
+            {{ isSubmitting ? 'Connexion...' : 'Se connecter' }}
           </button>
 
           <div class="text-center text-sm text-slate-600">
-            <RouterLink class="font-semibold text-slate-900 hover:underline" to="/">Retour à l’accueil</RouterLink>
+            <RouterLink class="font-semibold text-slate-900 hover:underline" to="/">
+              Retour a l'accueil
+            </RouterLink>
           </div>
         </form>
       </div>
