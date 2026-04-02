@@ -15,7 +15,8 @@ const isAuthenticated = data ? JSON.parse(data) : null;
 const database = isAuthenticated?.user?.database || '';
 
 const props = defineProps({
-    order: { type: Object, default: null }
+    order: { type: Object, default: null },
+    isSubmitting: { type: Boolean, default: false }
 });
 
 const emits = defineEmits(['onClose', 'create']);
@@ -46,11 +47,9 @@ const plateByName = computed(() => {
     return m;
 });
 
-const categoryOptions = computed(() => activeMenus.value.map(menu => menu.name));
+const menuOptions = computed(() => activeMenus.value.map(menu => menu.name));
 const sameMenuName = (left, right) => normalizeName(left) === normalizeName(right);
-const platesByCategory = (cat) =>{
-    return !cat ? [] : availablePlates.value.filter(p => sameMenuName(p.category, cat));
-}
+const platesByCategory = (cat) => !cat ? [] : availablePlates.value.filter(p => sameMenuName(p.category, cat));
 
 const emptyComplementLine = () => ({ category: '', complementId: '', name: '', price: 0, qty: 1 });
 const emptyPlateLine = () => ({ category: '', plateId: '', name: '', price: 0, qty: 1, complements: [] });
@@ -78,7 +77,8 @@ const setFormFromOrder = (order) => {
             }
             base.qty = Math.max(1, Number(p?.qty ?? 1));
             const rawComplements = Array.isArray(p?.complements)
-                ? p.complements : (p?.complement?.name ? [p.complement] : []);
+                ? p.complements
+                : (p?.complement?.name ? [p.complement] : []);
             base.complements = rawComplements.map(c => {
                 const complement = emptyComplementLine();
                 const cp = plateByName.value.get(normalizeName(c?.name));
@@ -111,8 +111,9 @@ const tableOptions = computed(() => {
     if (form.type !== 'Sur place') return availableTables;
     const options = [...availableTables];
     const currentTable = (form.table ?? '').trim();
-    if (currentTable && !options.some(t => t.name === currentTable))
+    if (currentTable && !options.some(t => t.name === currentTable)) {
         options.unshift({ id: 'current', name: currentTable });
+    }
     return options;
 });
 
@@ -172,7 +173,8 @@ const total = computed(() =>
     form.plates.reduce((sum, p) => {
         const qty = Math.max(1, Number(p.qty ?? 1));
         const complementsTotal = Array.isArray(p.complements)
-            ? p.complements.reduce((acc, c) => acc + (Math.max(1, Number(c?.qty ?? 1)) * Number(c?.price ?? 0)), 0) : 0;
+            ? p.complements.reduce((acc, c) => acc + (Math.max(1, Number(c?.qty ?? 1)) * Number(c?.price ?? 0)), 0)
+            : 0;
         return sum + qty * Number(p.price) + complementsTotal;
     }, 0)
 );
@@ -184,7 +186,13 @@ const randomNumber = () => {
 };
 
 const onSubmit = () => {
+    if (props.isSubmitting) {
+        return;
+    }
+
     emits('create', {
+        ...(props.order?.id ? { id: props.order.id } : {}),
+        database,
         type: form.type,
         table: form.table,
         client: form.client,
@@ -199,10 +207,11 @@ const onSubmit = () => {
             price: Number(p.price),
             qty: Math.max(1, Number(p.qty ?? 1)),
             complements: Array.isArray(p.complements)
-                ? p.complements.filter(c => Boolean((c?.name ?? '').trim()))
+                ? p.complements
+                    .filter(c => Boolean((c?.name ?? '').trim()))
                     .map(c => ({ name: c.name, price: Number(c.price ?? 0), qty: Math.max(1, Number(c.qty ?? 1)) }))
                 : [],
-        }))
+        })),
     });
 };
 
@@ -229,11 +238,10 @@ onMounted(() => {
 
 <template>
     <FormBackGround>
-        <!-- Header fixe -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-white text-base">
-                    {{ order ? '✏️' : '🧾' }}
+                    {{ order ? 'Edit' : 'New' }}
                 </div>
                 <div>
                     <h2 class="text-base font-semibold text-slate-900">
@@ -242,66 +250,88 @@ onMounted(() => {
                     <p class="text-xs text-slate-400">{{ order ? order.order_id : 'Remplissez les informations ci-dessous' }}</p>
                 </div>
             </div>
-            <button type="button" @click="emits('onClose')"
-                class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors text-xl leading-none">
-                ×
+            <button
+                type="button"
+                @click="emits('onClose')"
+                class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors text-xl leading-none"
+            >
+                x
             </button>
         </div>
 
-        <!-- Corps scrollable -->
         <form @submit.prevent="onSubmit" class="flex flex-col flex-1 overflow-hidden">
             <div class="flex-1 overflow-y-auto px-6 py-5 space-y-6">
-
-                <!-- Type de commande -->
                 <div>
                     <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Type de commande</label>
                     <div class="mt-2 grid grid-cols-2 gap-3">
-                        <button type="button" @click="form.type = 'Sur place'; form.table = ''"
+                        <button
+                            type="button"
+                            @click="form.type = 'Sur place'; form.table = ''"
                             :class="form.type === 'Sur place'
                                 ? 'bg-slate-800 text-white border-slate-800 shadow-sm'
                                 : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'"
-                            class="flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all">
-                            <span class="text-base">🍽</span> Sur place
+                            class="flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all"
+                        >
+                            <span class="text-base">Desk</span> Sur place
                         </button>
-                        <button type="button" @click="form.type = 'Emporté'; form.table = 'Emporté'"
+                        <button
+                            type="button"
+                            @click="form.type = 'Emporté'; form.table = 'Emporté'"
                             :class="form.type === 'Emporté'
                                 ? 'bg-slate-800 text-white border-slate-800 shadow-sm'
                                 : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'"
-                            class="flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all">
-                            <span class="text-base">🥡</span> Emporté
+                            class="flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all"
+                        >
+                            <span class="text-base">Bag</span> Emporté
                         </button>
                     </div>
                 </div>
 
-                <!-- Infos générales -->
                 <div class="bg-slate-50 rounded-xl p-4 space-y-4">
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Informations</p>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-medium text-slate-600 mb-1 block">N° de table</label>
-                            <select v-if="form.type === 'Sur place'" v-model="form.table" required
-                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100">
+                            <select
+                                v-if="form.type === 'Sur place'"
+                                v-model="form.table"
+                                required
+                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                            >
                                 <option value="" disabled>Choisir une table</option>
                                 <option v-for="t in tableOptions" :key="t.id" :value="t.name">{{ t.name }}</option>
                             </select>
-                            <input v-else-if="form.type === 'Emporté'" value="Emporté" disabled
-                                class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-400 cursor-not-allowed" />
-                            <div v-else
-                                class="w-full rounded-lg border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-400 bg-white">
+                            <input
+                                v-else-if="form.type === 'Emporté'"
+                                value="Emporté"
+                                disabled
+                                class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-400 cursor-not-allowed"
+                            />
+                            <div
+                                v-else
+                                class="w-full rounded-lg border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-400 bg-white"
+                            >
                                 Choisir un type d'abord
                             </div>
                         </div>
                         <div>
                             <label class="text-xs font-medium text-slate-600 mb-1 block">Nom du client</label>
-                            <input v-model="form.client" required placeholder="ex: Dupont"
-                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100" />
+                            <input
+                                v-model="form.client"
+                                required
+                                placeholder="ex: Dupont"
+                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                            />
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-medium text-slate-600 mb-1 block">Statut</label>
-                            <select v-model="form.stat" required
-                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100">
+                            <select
+                                v-model="form.stat"
+                                required
+                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                            >
                                 <option>En attente</option>
                                 <option>En préparation</option>
                                 <option>Prêt</option>
@@ -311,8 +341,11 @@ onMounted(() => {
                         </div>
                         <div>
                             <label class="text-xs font-medium text-slate-600 mb-1 block">Paiement</label>
-                            <select v-model="form.payment" required
-                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100">
+                            <select
+                                v-model="form.payment"
+                                required
+                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                            >
                                 <option>En attente</option>
                                 <option>Payé</option>
                                 <option>Refusé</option>
@@ -321,30 +354,36 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <!-- Plats -->
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Plats commandés</p>
-                        <button type="button" @click="addPlate"
-                            class="flex items-center gap-1 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors">
+                        <button
+                            type="button"
+                            @click="addPlate"
+                            class="flex items-center gap-1 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors"
+                        >
                             <span class="text-base leading-none">+</span> Ajouter un plat
                         </button>
                     </div>
-                    
+
                     <div class="space-y-3">
-                        <div v-for="(plate, i) in form.plates" :key="i"
-                            class="border border-slate-200 rounded-xl overflow-hidden">
-                            <!-- En-tête du plat -->
+                        <div v-for="(plate, i) in form.plates" :key="i" class="border border-slate-200 rounded-xl overflow-hidden">
                             <div class="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-100">
-                                <span class="text-xs font-semibold text-slate-600">Plat {{ i + 1 }}
-                                    <span v-if="plate.name" class="text-slate-400 font-normal">— {{ plate.name }}</span>
+                                <span class="text-xs font-semibold text-slate-600">
+                                    Plat {{ i + 1 }}
+                                    <span v-if="plate.name" class="text-slate-400 font-normal">- {{ plate.name }}</span>
                                 </span>
                                 <div class="flex items-center gap-3">
                                     <span v-if="plate.price" class="text-xs font-semibold text-slate-700">
                                         {{ (Math.max(1, Number(plate.qty ?? 1)) * Number(plate.price)).toLocaleString('fr-FR') }} FCFA
                                     </span>
-                                    <button type="button" @click="removePlate(i)"
-                                        class="w-6 h-6 flex items-center justify-center rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors text-lg leading-none">×</button>
+                                    <button
+                                        type="button"
+                                        @click="removePlate(i)"
+                                        class="w-6 h-6 flex items-center justify-center rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors text-lg leading-none"
+                                    >
+                                        x
+                                    </button>
                                 </div>
                             </div>
 
@@ -352,18 +391,25 @@ onMounted(() => {
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
                                         <label class="text-xs font-medium text-slate-600 mb-1 block">Menu</label>
-                                        <select v-model="plate.category" required
+                                        <select
+                                            v-model="plate.category"
+                                            required
                                             class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
-                                            @change="onPlateMenuChange(plate)">
+                                            @change="onPlateMenuChange(plate)"
+                                        >
                                             <option value="" disabled>Menu</option>
-                                            <option v-for="c in categoryOptions" :key="c" :value="c">{{ c }}</option>
+                                            <option v-for="menu in menuOptions" :key="menu" :value="menu">{{ menu }}</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label class="text-xs font-medium text-slate-600 mb-1 block">Plat</label>
-                                        <select v-model="plate.plateId" required
+                                        <select
+                                            v-model="plate.plateId"
+                                            required
                                             class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
-                                            :disabled="!plate.category" @change="onMainPlateChange(plate)">
+                                            :disabled="!plate.category"
+                                            @change="onMainPlateChange(plate)"
+                                        >
                                             <option value="" disabled>Choisir un plat</option>
                                             <option v-for="p in platesByCategory(plate.category)" :key="p.id" :value="String(p.id)">
                                                 {{ p.name }}
@@ -375,8 +421,14 @@ onMounted(() => {
                                 <div class="flex items-center gap-3">
                                     <div class="flex-1 flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2">
                                         <span class="text-xs text-slate-500">Qté</span>
-                                        <input v-model.number="plate.qty" type="number" min="1" step="1" required
-                                            class="w-16 bg-transparent text-sm font-medium text-slate-700 outline-none" />
+                                        <input
+                                            v-model.number="plate.qty"
+                                            type="number"
+                                            min="1"
+                                            step="1"
+                                            required
+                                            class="w-16 bg-transparent text-sm font-medium text-slate-700 outline-none"
+                                        />
                                     </div>
                                     <div v-if="plate.price" class="flex-1 bg-slate-50 rounded-lg px-3 py-2">
                                         <span class="text-xs text-slate-500">Prix unit. </span>
@@ -384,41 +436,53 @@ onMounted(() => {
                                     </div>
                                 </div>
 
-                                <!-- Compléments -->
                                 <div class="pt-2 border-t border-slate-100">
                                     <div class="flex items-center justify-between mb-2">
                                         <p class="text-xs text-slate-500 font-medium">Compléments</p>
-                                        <button type="button" @click="addComplement(plate)"
-                                            class="text-xs text-slate-500 hover:text-slate-700 border border-dashed border-slate-300 rounded-lg px-2 py-1 hover:border-slate-400 transition-colors">
+                                        <button
+                                            type="button"
+                                            @click="addComplement(plate)"
+                                            class="text-xs text-slate-500 hover:text-slate-700 border border-dashed border-slate-300 rounded-lg px-2 py-1 hover:border-slate-400 transition-colors"
+                                        >
                                             + Complément
                                         </button>
                                     </div>
 
                                     <div v-if="plate.complements.length" class="space-y-2">
-                                        <div v-for="(c, ci) in plate.complements" :key="ci"
-                                            class="bg-slate-50 rounded-lg p-3 space-y-2">
+                                        <div v-for="(c, ci) in plate.complements" :key="ci" class="bg-slate-50 rounded-lg p-3 space-y-2">
                                             <div class="flex items-center justify-between">
-                                                <span class="text-xs font-medium text-slate-500">Complément {{ ci + 1 }}
-                                                    <span v-if="c.name" class="text-slate-400 font-normal">— {{ c.name }}</span>
+                                                <span class="text-xs font-medium text-slate-500">
+                                                    Complément {{ ci + 1 }}
+                                                    <span v-if="c.name" class="text-slate-400 font-normal">- {{ c.name }}</span>
                                                 </span>
                                                 <div class="flex items-center gap-2">
                                                     <span v-if="c.price" class="text-xs font-semibold text-slate-600">
                                                         {{ (Math.max(1, Number(c.qty ?? 1)) * Number(c.price ?? 0)).toLocaleString('fr-FR') }} FCFA
                                                     </span>
-                                                    <button type="button" @click="removeComplement(plate, ci)"
-                                                        class="w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors text-base leading-none">×</button>
+                                                    <button
+                                                        type="button"
+                                                        @click="removeComplement(plate, ci)"
+                                                        class="w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors text-base leading-none"
+                                                    >
+                                                        x
+                                                    </button>
                                                 </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-2">
-                                                <select v-model="c.category"
+                                                <select
+                                                    v-model="c.category"
                                                     class="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-slate-400"
-                                                    @change="onComplementMenuChange(c)">
+                                                    @change="onComplementMenuChange(c)"
+                                                >
                                                     <option value="" disabled>Menu</option>
-                                                    <option v-for="cat in categoryOptions" :key="cat" :value="cat">{{ cat }}</option>
+                                                    <option v-for="menu in menuOptions" :key="menu" :value="menu">{{ menu }}</option>
                                                 </select>
-                                                <select v-model="c.complementId"
+                                                <select
+                                                    v-model="c.complementId"
                                                     class="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-slate-400 disabled:bg-slate-100 disabled:text-slate-400"
-                                                    :disabled="!c.category" @change="onComplementPlateChange(plate, c)">
+                                                    :disabled="!c.category"
+                                                    @change="onComplementPlateChange(plate, c)"
+                                                >
                                                     <option value="" disabled>Complément</option>
                                                     <option v-for="p in platesByCategory(c.category)" :key="p.id" :value="String(p.id)">
                                                         {{ p.name }}
@@ -427,8 +491,13 @@ onMounted(() => {
                                             </div>
                                             <div class="flex items-center gap-2">
                                                 <span class="text-xs text-slate-500">Qté</span>
-                                                <input v-model.number="c.qty" type="number" min="1" step="1"
-                                                    class="w-16 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-slate-400" />
+                                                <input
+                                                    v-model.number="c.qty"
+                                                    type="number"
+                                                    min="1"
+                                                    step="1"
+                                                    class="w-16 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-slate-400"
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -439,23 +508,27 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <!-- Commentaires -->
                 <div>
                     <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">Commentaires</label>
-                    <textarea v-model="form.comments" placeholder="ex: Sans oignon, bien cuit…" rows="2"
-                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 resize-none"></textarea>
+                    <textarea
+                        v-model="form.comments"
+                        placeholder="ex: Sans oignon, bien cuit..."
+                        rows="2"
+                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 resize-none"
+                    ></textarea>
                 </div>
             </div>
 
-            <!-- Footer fixe -->
             <div class="px-6 py-4 border-t border-slate-100 bg-white flex items-center justify-between gap-4 rounded-b-2xl">
                 <div class="text-sm font-semibold text-slate-800">
                     Total : <span class="text-base">{{ total.toLocaleString('fr-FR') }}</span>
                     <span class="text-xs font-normal text-slate-500 ml-1">FCFA</span>
                 </div>
                 <div class="flex gap-3">
-                    <SecondaryButton type="button" @click="emits('onClose')">Annuler</SecondaryButton>
-                    <PrimaryButton type="submit">{{ order ? 'Enregistrer' : 'Créer la commande' }}</PrimaryButton>
+                    <SecondaryButton type="button" @click="emits('onClose')" :disabled="isSubmitting">Annuler</SecondaryButton>
+                    <PrimaryButton type="submit" :disabled="isSubmitting">
+                        {{ isSubmitting ? 'Enregistrement...' : (order ? 'Enregistrer' : 'Créer la commande') }}
+                    </PrimaryButton>
                 </div>
             </div>
         </form>
