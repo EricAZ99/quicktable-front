@@ -157,6 +157,42 @@ const saveMenu = async (payload) => {
     }
 };
 
+const activateMenus = async (menu) => {
+    if (!menu?.id) {
+        return;
+    }
+
+    is_submitting.value = true;
+
+    try {
+        const response = await updateMenu(menu.id, {
+            ...menu,
+            active: !menu.active,
+            database,
+        });
+
+        const index = menus.value.findIndex(item => item.id === menu.id);
+
+        if (index !== -1) {
+            menus.value.splice(index, 1, response.menu);
+        }
+
+        if (selected_menu.value?.id === menu.id) {
+            selected_menu.value = response.menu;
+        }
+
+        toast_type.value = 'success';
+        toast_message.value = response.menu.active
+            ? `"${response.menu.name}" est maintenant actif.`
+            : `"${response.menu.name}" est maintenant inactif.`;
+    } catch (error) {
+        toast_type.value = 'error';
+        toast_message.value = error.message || "La mise a jour du statut du menu a echoue.";
+    } finally {
+        is_submitting.value = false;
+        show_toast.value = true;
+    }
+}
 onMounted(() => {
     loadMenus();
 });
@@ -166,29 +202,21 @@ onMounted(() => {
     <div>
         <AuthenticatedLayoutAdmin :title="'Menu'" :mean="'Gestion de menus'">
             <Transition name="page" mode="out-in" appear>
-                <ActivityTableContainer
-                    :title="'Liste des Menus'"
-                    :description="'Gestion des menus'"
-                    :has-button="true"
-                    :button-title="'Ajouter un menu'"
-                    @on-click="open_form"
-                >
+                <ActivityTableContainer :title="'Liste des Menus'" :description="'Gestion des menus'" :has-button="true"
+                    :button-title="'Ajouter un menu'" @on-click="open_form">
                     <template #search&switch>
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
                             <label class="inline-flex items-center gap-3 select-none cursor-pointer">
                                 <span class="text-sm text-slate-700">Tableau</span>
                                 <input type="checkbox" v-model="show_active_only" class="sr-only peer" />
                                 <div
-                                    class="relative h-6 w-11 rounded-full bg-slate-200 transition-colors peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-slate-400 peer-checked:bg-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5"
-                                ></div>
+                                    class="relative h-6 w-11 rounded-full bg-slate-200 transition-colors peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-slate-400 peer-checked:bg-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5">
+                                </div>
                                 <span class="text-sm text-slate-700">Cartes</span>
                             </label>
 
-                            <input
-                                type="text"
-                                placeholder="Recherche"
-                                class="w-full max-w-xs p-2 px-4 border rounded-xl text-sm outline-none focus:border-slate-400"
-                            />
+                            <input type="text" placeholder="Recherche"
+                                class="w-full max-w-xs p-2 px-4 border rounded-xl text-sm outline-none focus:border-slate-400" />
                         </div>
                     </template>
 
@@ -196,25 +224,12 @@ onMounted(() => {
                         <div v-if="is_loading" class="p-6 text-sm text-slate-500">
                             Chargement des menus...
                         </div>
-                        <Table
-                            v-else-if="!show_active_only"
-                            :data="menus"
-                            :columns="menuColumns"
-                            @edit="open_update_form"
-                            @view="open_view"
-                            :has_update_button="true"
-                            :has_view_button="true"
-                            :has_delete_button="true"
-                            @toggle-active="loadMenus"
-                            @delete="requestDelete"
-                        ></Table>
+                        <Table v-else-if="!show_active_only" :data="menus" :columns="menuColumns"
+                            @edit="open_update_form" @view="open_view" :has_update_button="true" :has_view_button="true"
+                            :has_delete_button="true" @toggle-active="activateMenus" @delete="requestDelete"></Table>
                         <div v-else class="p-6">
-                            <MenuCardItem
-                                :menus="menus"
-                                @view="open_view"
-                                @edit="open_update_form"
-                                @delete="requestDelete"
-                            />
+                            <MenuCardItem :menus="menus" @view="open_view" @edit="open_update_form"
+                                @delete="requestDelete" />
                         </div>
                     </Transition>
                 </ActivityTableContainer>
@@ -225,31 +240,18 @@ onMounted(() => {
             </Transition>
 
             <Transition name="slide-up">
-                <MenuForm
-                    v-if="switch_form"
-                    :is-submitting="is_submitting"
-                    @create="saveMenu"
-                    @on-close="close_form"
-                ></MenuForm>
+                <MenuForm v-if="switch_form" :is-submitting="is_submitting" @create="saveMenu" @on-close="close_form">
+                </MenuForm>
             </Transition>
 
             <Transition name="slide-up">
-                <MenuForm
-                    v-if="switch_update_form"
-                    :menu="selected_menu"
-                    :is-submitting="is_submitting"
-                    @create="saveMenu"
-                    @on-close="close_update_form"
-                ></MenuForm>
+                <MenuForm v-if="switch_update_form" :menu="selected_menu" :is-submitting="is_submitting"
+                    @create="saveMenu" @on-close="close_update_form"></MenuForm>
             </Transition>
 
-            <ConfirmDeleteModal
-                v-if="confirm_delete"
-                :item-name="menu_to_delete?.name"
+            <ConfirmDeleteModal v-if="confirm_delete" :item-name="menu_to_delete?.name"
                 message="Voulez-vous vraiment supprimer ce menu ? Cette action est irreversible."
-                @confirm="confirmDelete"
-                @cancel="cancelDelete"
-            />
+                @confirm="confirmDelete" @cancel="cancelDelete" />
 
             <Toast v-if="show_toast" :type="toast_type" :message="toast_message" @close="show_toast = false" />
         </AuthenticatedLayoutAdmin>
