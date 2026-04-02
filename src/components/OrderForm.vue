@@ -1,11 +1,18 @@
 <script setup>
-import { reactive, ref, computed, watch } from 'vue';
+import { onMounted, reactive, ref, computed, watch } from 'vue';
 import FormBackGround from './FormBackGround.vue';
 import PrimaryButton from './PrimaryButton.vue';
 import SecondaryButton from './SecondaryButton.vue';
-import { tables, plates as availablePlates, categories as availableCategories } from '../data/menus';
+import { tables } from '../data/menus';
+import { listMenus } from '../services/menus';
+import { listPlates } from '../services/plates';
 
 const availableTables = tables.filter(t => t.stat === 'Libre');
+const availablePlates = ref([]);
+const activeMenus = ref([]);
+const data = localStorage.getItem('user_authenticated');
+const isAuthenticated = data ? JSON.parse(data) : null;
+const database = isAuthenticated?.user?.database || '';
 
 const props = defineProps({
     order: { type: Object, default: null }
@@ -29,18 +36,21 @@ const normalizeName = (value) => String(value ?? '')
 
 const plateById = computed(() => {
     const m = new Map();
-    for (const p of availablePlates) m.set(String(p.id), p);
+    for (const p of availablePlates.value) m.set(String(p.id), p);
     return m;
 });
 
 const plateByName = computed(() => {
     const m = new Map();
-    for (const p of availablePlates) m.set(normalizeName(p.name), p);
+    for (const p of availablePlates.value) m.set(normalizeName(p.name), p);
     return m;
 });
 
-const categoryOptions = computed(() => availableCategories.map(c => c.name));
-const platesByCategory = (cat) => !cat ? [] : availablePlates.filter(p => p.category === cat);
+const categoryOptions = computed(() => activeMenus.value.map(menu => menu.name));
+const sameMenuName = (left, right) => normalizeName(left) === normalizeName(right);
+const platesByCategory = (cat) =>{
+    return !cat ? [] : availablePlates.value.filter(p => sameMenuName(p.category, cat));
+}
 
 const emptyComplementLine = () => ({ category: '', complementId: '', name: '', price: 0, qty: 1 });
 const emptyPlateLine = () => ({ category: '', plateId: '', name: '', price: 0, qty: 1, complements: [] });
@@ -106,17 +116,44 @@ const tableOptions = computed(() => {
     return options;
 });
 
+const resetPlateSelection = (plateLine) => {
+    plateLine.plateId = '';
+    plateLine.name = '';
+    plateLine.price = 0;
+    plateLine.complements = [];
+};
+
+const resetComplementSelection = (complementLine) => {
+    complementLine.complementId = '';
+    complementLine.name = '';
+    complementLine.price = 0;
+};
+
+const onPlateMenuChange = (plateLine) => {
+    resetPlateSelection(plateLine);
+};
+
 const onMainPlateChange = (plateLine) => {
     const selected = plateById.value.get(String(plateLine.plateId));
-    if (!selected) { plateLine.name = ''; plateLine.price = 0; return; }
+    if (!selected || !sameMenuName(selected.category, plateLine.category)) {
+        resetPlateSelection(plateLine);
+        return;
+    }
     plateLine.name = selected.name;
     plateLine.price = Number(selected.price ?? 0);
+};
+
+const onComplementMenuChange = (complementLine) => {
+    resetComplementSelection(complementLine);
 };
 
 const onComplementPlateChange = (plateLine, complementLine) => {
     const hadComplement = Boolean((complementLine?.name ?? '').trim());
     const selected = plateById.value.get(String(complementLine.complementId));
-    if (!selected) { complementLine.name = ''; complementLine.price = 0; return; }
+    if (!selected || !sameMenuName(selected.category, complementLine.category)) {
+        resetComplementSelection(complementLine);
+        return;
+    }
     complementLine.name = selected.name;
     complementLine.price = Number(selected.price ?? 0);
     if (!hadComplement) complementLine.qty = Math.max(1, Number(plateLine.qty ?? 1));
@@ -168,6 +205,26 @@ const onSubmit = () => {
         }))
     });
 };
+
+const loadOrderDependencies = async () => {
+    try {
+        const [menusResponse, platesResponse] = await Promise.all([
+            listMenus(database),
+            listPlates(database),
+        ]);
+
+        activeMenus.value = (menusResponse.menus || []).filter(menu => menu.active);
+        availablePlates.value = (platesResponse.meals || []).filter(plate => plate.active);
+        setFormFromOrder(props.order);
+    } catch (_error) {
+        activeMenus.value = [];
+        availablePlates.value = [];
+    }
+};
+
+onMounted(() => {
+    loadOrderDependencies();
+});
 </script>
 
 <template>
@@ -273,7 +330,7 @@ const onSubmit = () => {
                             <span class="text-base leading-none">+</span> Ajouter un plat
                         </button>
                     </div>
-
+                    
                     <div class="space-y-3">
                         <div v-for="(plate, i) in form.plates" :key="i"
                             class="border border-slate-200 rounded-xl overflow-hidden">
@@ -294,11 +351,11 @@ const onSubmit = () => {
                             <div class="p-4 space-y-3">
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label class="text-xs font-medium text-slate-600 mb-1 block">Catégorie</label>
+                                        <label class="text-xs font-medium text-slate-600 mb-1 block">Menu</label>
                                         <select v-model="plate.category" required
                                             class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
-                                            @change="plate.plateId = ''; onMainPlateChange(plate)">
-                                            <option value="" disabled>Catégorie</option>
+                                            @change="onPlateMenuChange(plate)">
+                                            <option value="" disabled>Menu</option>
                                             <option v-for="c in categoryOptions" :key="c" :value="c">{{ c }}</option>
                                         </select>
                                     </div>
@@ -355,8 +412,8 @@ const onSubmit = () => {
                                             <div class="grid grid-cols-2 gap-2">
                                                 <select v-model="c.category"
                                                     class="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs outline-none focus:border-slate-400"
-                                                    @change="c.complementId = ''; onComplementPlateChange(plate, c)">
-                                                    <option value="" disabled>Catégorie</option>
+                                                    @change="onComplementMenuChange(c)">
+                                                    <option value="" disabled>Menu</option>
                                                     <option v-for="cat in categoryOptions" :key="cat" :value="cat">{{ cat }}</option>
                                                 </select>
                                                 <select v-model="c.complementId"
