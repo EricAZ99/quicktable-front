@@ -6,7 +6,8 @@ import SecondaryButton from './SecondaryButton.vue';
 import { listMenus } from '../services/menus';
 
 const props = defineProps({
-    plate: { type: Object, default: null }
+    plate: { type: Object, default: null },
+    isSubmitting: { type: Boolean, default: false }
 });
 const emits = defineEmits(['onClose', 'create']);
 
@@ -20,14 +21,39 @@ const plateForm = reactive({
     description: props.plate?.description ?? '',
     category: props.plate?.category ?? '',
     price: props.plate?.price ?? '',
-    image: '',
+    image: props.plate?.image ?? '',
     active: props.plate?.active ?? false,
 });
 
-const onSubmit = () => emits('create', {
-    ...plateForm,
-    ...(props.plate?.id != null ? { id: props.plate.id } : {}),
-});
+const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        if (typeof reader.result === 'string') {
+            plateForm.image = reader.result;
+        }
+    };
+
+    reader.readAsDataURL(file);
+};
+
+const onSubmit = () => {
+    if (props.isSubmitting) {
+        return;
+    }
+
+    emits('create', {
+        ...plateForm,
+        ...(props.plate?.id != null ? { id: props.plate.id } : {}),
+        database,
+    });
+};
 
 const loadMenus = async () => {
     try {
@@ -130,10 +156,16 @@ onMounted(() => {
                         for="image"
                         class="flex flex-col items-center justify-center gap-2 w-full border-2 border-dashed border-slate-200 rounded-xl p-6 cursor-pointer hover:border-slate-400 hover:bg-slate-50 transition-colors"
                     >
-                        <span class="text-3xl">Img</span>
+                        <img
+                            v-if="plateForm.image"
+                            :src="plateForm.image"
+                            alt="Apercu du plat"
+                            class="h-32 max-w-xs rounded-xl object-contain"
+                        />
+                        <span v-else class="text-3xl">Img</span>
                         <span class="text-sm font-medium text-slate-600">Cliquer pour importer une image</span>
                         <span class="text-xs text-slate-400">PNG, JPG jusqu'a 5 Mo</span>
-                        <input id="image" type="file" accept="image/*" class="sr-only" @change="e => plateForm.image = e.target.files[0]" />
+                        <input id="image" type="file" accept="image/*" class="sr-only" @change="handleImageChange" />
                     </label>
                 </div>
 
@@ -159,8 +191,10 @@ onMounted(() => {
                 </div>
                 <div v-else class="text-xs text-slate-400">Aucun prix renseigne</div>
                 <div class="flex gap-3">
-                    <SecondaryButton type="button" @click="emits('onClose')">Annuler</SecondaryButton>
-                    <PrimaryButton type="submit">{{ plate ? 'Enregistrer' : 'Creer le plat' }}</PrimaryButton>
+                    <SecondaryButton type="button" @click="emits('onClose')" :disabled="isSubmitting">Annuler</SecondaryButton>
+                    <PrimaryButton type="submit" :disabled="isSubmitting">
+                        {{ isSubmitting ? 'Enregistrement...' : (plate ? 'Enregistrer' : 'Creer le plat') }}
+                    </PrimaryButton>
                 </div>
             </div>
         </form>
