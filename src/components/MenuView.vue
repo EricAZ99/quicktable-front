@@ -28,6 +28,9 @@ const emits = defineEmits(['close']);
 
         <!-- Corps -->
         <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+            <div v-if="menu.image" class="flex justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50 p-4">
+                <img :src="menu.image" :alt="menu.name" class="max-h-64 w-full max-w-sm object-contain" />
+            </div>
 
             <!-- Badge actif -->
             <div class="flex flex-wrap gap-2">

@@ -19,9 +19,29 @@ async function request(path, options = {}) {
   return data;
 }
 
+export function get(path) {
+  return request(path, {
+    method: "GET",
+  });
+}
+
 export function post(path, body) {
   return request(path, {
     method: "POST",
     body: JSON.stringify(body),
+  });
+}
+
+export function put(path, body) {
+  return request(path, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export function remove(path, body) {
+  return request(path, {
+    method: "DELETE",
+    ...(body ? { body: JSON.stringify(body) } : {}),
   });
 }

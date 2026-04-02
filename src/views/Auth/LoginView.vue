@@ -12,21 +12,32 @@ const isSubmitting = ref(false)
 const error = ref('')
 
 async function onSubmit() {
+  if (isSubmitting.value) {
+    return
+  }
+
   error.value = ''
+  const normalizedEmail = email.value.trim().toLowerCase()
+  const normalizedPassword = password.value.trim()
+
+  if (!normalizedEmail || !normalizedPassword) {
+    error.value = 'Email et mot de passe requis.'
+    return
+  }
+
   isSubmitting.value = true
 
   try {
-    if (!email.value || !password.value) {
-      error.value = 'Email et mot de passe requis.'
-      return
-    }
-
     const response = await login({
-      email: email.value,
-      password: password.value,
+      email: normalizedEmail,
+      password: normalizedPassword,
     })
 
-    localStorage.setItem('quicktable_auth', JSON.stringify(response))
+    if (!response?.token || !response?.user) {
+      throw new Error('Reponse de connexion invalide.')
+    }
+
+    localStorage.setItem('user_authenticated', JSON.stringify(response))
     await router.push('/admin-home')
   } catch (err) {
     error.value = err.message || 'Connexion impossible.'

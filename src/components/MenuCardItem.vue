@@ -11,6 +11,9 @@ const emit = defineEmits(['view', 'edit', 'delete']);
 
         <article v-for="menu in menus" :key="menu.id"
             class="rounded-2xl border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            <div v-if="menu.image" class="mb-4 flex justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <img :src="menu.image" :alt="menu.name" class="max-h-36 w-full max-w-[220px] object-contain" />
+            </div>
             <header class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="grid h-10 w-10 place-items-center rounded-xl bg-slate-800 text-xl shrink-0">📋</div>
