@@ -1,10 +1,17 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import PrimaryButton from '../../components/PrimaryButton.vue';
+import { listNotifications, markAllNotificationsAsRead } from '../../services/notifications';
 
 const route = useRoute()
 const isSidepanelOpen = ref(false)
+const notifications = ref([])
+const isLoadingNotifications = ref(false)
+const data = localStorage.getItem('user_authenticated');
+const isAuthenticated = data ? JSON.parse(data) : null;
+const database = isAuthenticated?.user?.database || '';
+
 const props = defineProps({
     title: {
         type: String,
@@ -21,6 +28,76 @@ const props = defineProps({
 const switchNav = () => {
     isSidepanelOpen.value = !isSidepanelOpen.value
 }
+
+const unreadCount = computed(() => notifications.value.filter(notification => notification.unread).length)
+const todayCount = computed(() => notifications.value.filter(notification => {
+    if (!notification.createdAt) {
+        return false
+    }
+
+    const createdAt = new Date(notification.createdAt)
+    const now = new Date()
+
+    return createdAt.getFullYear() === now.getFullYear()
+        && createdAt.getMonth() === now.getMonth()
+        && createdAt.getDate() === now.getDate()
+}).length)
+const priorityCount = computed(() => notifications.value.filter(notification =>
+    ['warning', 'error'].includes(notification.type) && notification.unread
+).length)
+
+function notificationBadgeClasses(type) {
+    return {
+        warning: 'bg-amber-50 text-amber-700 ring-amber-200',
+        success: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        info: 'bg-sky-50 text-sky-700 ring-sky-200',
+        default: 'bg-slate-100 text-slate-700 ring-slate-200',
+    }[type] || 'bg-slate-100 text-slate-700 ring-slate-200'
+}
+
+function notificationDotClasses(type) {
+    return {
+        warning: 'bg-amber-500',
+        success: 'bg-emerald-500',
+        info: 'bg-sky-500',
+        default: 'bg-slate-400',
+    }[type] || 'bg-slate-400'
+}
+
+async function loadNotifications() {
+    if (!database) {
+        notifications.value = []
+        return
+    }
+
+    isLoadingNotifications.value = true
+
+    try {
+        const response = await listNotifications(database)
+        notifications.value = response.notifications || []
+    } catch (_error) {
+        notifications.value = []
+    } finally {
+        isLoadingNotifications.value = false
+    }
+}
+
+async function markAllAsRead() {
+    if (!database) {
+        return
+    }
+
+    try {
+        const response = await markAllNotificationsAsRead(database)
+        notifications.value = response.notifications || []
+    } catch (_error) {
+        // On garde l'etat actuel si la mise a jour echoue.
+    }
+}
+
+onMounted(() => {
+    loadNotifications()
+})
 
 </script>
 
@@ -85,7 +162,9 @@ const switchNav = () => {
                             </svg>
                         </span>
                         <span
-                            class="bg-red-500 h-5 w-5 absolute -top-2 right-0 rounded-full flex justify-center items-center text-white text-[.6rem] shadow-xl drop-shadow-xl">99+</span>
+                            class="bg-red-500 min-w-5 h-5 px-1 absolute -top-2 right-0 rounded-full flex justify-center items-center text-white text-[.6rem] shadow-xl drop-shadow-xl">
+                            {{ unreadCount > 99 ? '99+' : unreadCount }}
+                        </span>
                     </span>
                     <!-- <span>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="h-6 w-6"
@@ -94,16 +173,115 @@ const switchNav = () => {
                                 d="M65.9 228.5c13.3-93 93.4-164.5 190.1-164.5 53 0 101 21.5 135.8 56.2 .2 .2 .4 .4 .6 .6l7.6 7.2-47.9 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l128 0c17.7 0 32-14.3 32-32l0-128c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 53.4-11.3-10.7C390.5 28.6 326.5 0 256 0 127 0 20.3 95.4 2.6 219.5 .1 237 12.2 253.2 29.7 255.7s33.7-9.7 36.2-27.1zm443.5 64c2.5-17.5-9.7-33.7-27.1-36.2s-33.7 9.7-36.2 27.1c-13.3 93-93.4 164.5-190.1 164.5-53 0-101-21.5-135.8-56.2-.2-.2-.4-.4-.6-.6l-7.6-7.2 47.9 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 320c-8.5 0-16.7 3.4-22.7 9.5S-.1 343.7 0 352.3l1 127c.1 17.7 14.6 31.9 32.3 31.7S65.2 496.4 65 478.7l-.4-51.5 10.7 10.1c46.3 46.1 110.2 74.7 180.7 74.7 129 0 235.7-95.4 253.4-219.5z" />
                         </svg>
                     </span> -->
-                    <PrimaryButton>
+                    <PrimaryButton @click="loadNotifications">
                         Actualiser
                     </PrimaryButton>
                 </div>
             </div>
             <Transition name="page" mode="out-in" appear>
-                <div id="mySidepanel"
-                    :class="isSidepanelOpen ? 'w-[250px] right-1' : 'w-0 -right-1'"
-                    class="fixed z-[99] border border-black h-[80%] bottom-0 bg-white overflow-x-hidden transition-all duration-200 pt-20">
-                    <div>d</div>
+                <div v-if="isSidepanelOpen" class="fixed inset-0 z-[99]">
+                    <button class="absolute inset-0 bg-slate-900/20 backdrop-blur-[1px]" @click="switchNav()" />
+                    <div
+                        class="absolute right-4 top-4 bottom-4 w-[calc(100%-2rem)] max-w-md rounded-[28px] border border-slate-200 bg-white/95 shadow-2xl ring-1 ring-black/5 backdrop-blur overflow-hidden">
+                        <div class="flex h-full flex-col">
+                            <div class="border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white px-5 py-4">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                                            Centre de notifications
+                                        </p>
+                                        <h2 class="mt-1 text-lg font-bold text-slate-800">
+                                            Suivi en temps réel
+                                        </h2>
+                                        <p class="mt-1 text-sm text-slate-500">
+                                            {{ unreadCount }} nouvelle<span v-if="unreadCount > 1">s</span> activité<span
+                                                v-if="unreadCount > 1">s</span> à consulter.
+                                        </p>
+                                    </div>
+                                    <button
+                                        class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                                        @click="switchNav()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="h-4 w-4"
+                                            fill="currentColor">
+                                            <path
+                                                d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="mt-4 grid grid-cols-3 gap-2">
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-3">
+                                        <p class="text-xs text-slate-400">Non lues</p>
+                                        <p class="mt-1 text-xl font-bold text-slate-800">{{ unreadCount }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-3">
+                                        <p class="text-xs text-slate-400">Aujourd’hui</p>
+                                        <p class="mt-1 text-xl font-bold text-slate-800">{{ todayCount }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-3">
+                                        <p class="text-xs text-slate-400">Priorité</p>
+                                        <p class="mt-1 text-xl font-bold text-amber-600">{{ priorityCount }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex-1 overflow-y-auto px-4 py-4">
+                                <div v-if="isLoadingNotifications" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+                                    Chargement des notifications...
+                                </div>
+                                <div v-else-if="notifications.length === 0"
+                                    class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
+                                    <p class="text-sm font-semibold text-slate-700">Aucune notification pour le moment</p>
+                                    <p class="mt-1 text-sm text-slate-500">
+                                        Les nouvelles actions du restaurant apparaîtront ici.
+                                    </p>
+                                </div>
+                                <div v-else class="space-y-3">
+                                    <article v-for="notification in notifications" :key="notification.id"
+                                        class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+                                        <div class="flex items-start gap-3">
+                                            <div class="mt-1 h-2.5 w-2.5 rounded-full shrink-0"
+                                                :class="notificationDotClasses(notification.type)" />
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-3">
+                                                    <h3 class="truncate text-sm font-semibold text-slate-800">
+                                                        {{ notification.title }}
+                                                    </h3>
+                                                    <span
+                                                        class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1"
+                                                        :class="notificationBadgeClasses(notification.type)">
+                                                        {{ notification.unread ? 'Nouveau' : 'Lu' }}
+                                                    </span>
+                                                </div>
+                                                <p class="mt-1 text-sm leading-5 text-slate-500">
+                                                    {{ notification.description }}
+                                                </p>
+                                                <div class="mt-3 flex items-center justify-between text-xs text-slate-400">
+                                                    <span>{{ notification.time }}</span>
+                                                    <button
+                                                        class="font-semibold text-slate-600 transition hover:text-slate-900">
+                                                        Voir le détail
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-100 bg-slate-50/80 px-5 py-4">
+                                <div class="flex items-center justify-between gap-3">
+                                    <p class="text-sm text-slate-500">
+                                        Les dernières activités importantes apparaissent ici.
+                                    </p>
+                                    <button
+                                        @click="markAllAsRead"
+                                        class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
+                                        Tout marquer lu
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </Transition>
             <div
@@ -127,34 +305,4 @@ const switchNav = () => {
     transform: translateY(12px);
 }
 
-.sidepanel {
-    width: 0;
-    position: fixed;
-    z-index: 1;
-    height: 100%;
-    top: 0;
-    right: 0;
-    background-color: #111;
-    overflow-x: hidden;
-    transition: 0.5s;
-    padding-top: 60px;
-}
-
-
-/* .fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-    transform: translateY(6px);
-}
-
-.slide-up-enter-active,
-.slide-up-leave-active {
-    transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.slide-up-enter-from,
-.slide-up-leave-to {
-    opacity: 0;
-    transform: translateY(16px);
-} */
 </style>
